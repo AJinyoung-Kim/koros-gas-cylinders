@@ -16,6 +16,9 @@
       },
       "requests": {
         ".read": true
+      },
+      "orders": {
+        ".read": true
       }
     },
     "secret": {

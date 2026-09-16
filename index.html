@@ -239,7 +239,9 @@ dialog.wide{width:min(760px,calc(100vw - 32px))}
 .rq .done:hover{background:var(--status-new-bg);color:var(--status-new);border-color:var(--status-new)}
 .rq .done.waiting{background:var(--status-used-bg);color:var(--status-used);border-color:var(--status-used)}
 .rq .done.waiting:hover{background:var(--status-new-bg);color:var(--status-new);border-color:var(--status-new)}
-.rq .acts{display:inline-flex;gap:6px;align-items:center}
+.rq .acts{display:inline-flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.rq .undo{border:1px dashed var(--border-strong);background:transparent;border-radius:8px;padding:5px 8px;font-size:11.5px;font-weight:600;color:var(--text-3);white-space:nowrap}
+.rq .undo:hover{color:var(--text);border-color:var(--text-2)}
 .rq .rx{width:28px;height:28px;border:1px solid transparent;background:transparent;border-radius:8px;color:var(--text-3);font-size:16px;line-height:1}
 .rq .rx:hover{color:var(--danger);border-color:var(--danger)}
 .rq .stage{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--status-used)}
@@ -291,6 +293,10 @@ dialog.wide{width:min(760px,calc(100vw - 32px))}
 .seg{display:inline-flex;background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:3px}
 .seg button{border:0;background:transparent;padding:6px 11px;border-radius:7px;font-size:13px;font-weight:600;color:var(--text-2)}
 .seg button.on{background:var(--surface);color:var(--text);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.table-wrap{overflow:auto;border:1px solid var(--border);border-radius:10px}
+.badge.ordered{background:var(--status-used-bg);color:var(--status-used)}
+.badge.received{background:var(--status-new-bg);color:var(--status-new)}
+.badge.removed{background:var(--surface-2);color:var(--text-3)}
 .glist{display:grid;gap:10px}
 .ggroup{border:1px solid var(--border);border-radius:12px;background:var(--surface);overflow:hidden}
 .ggroup .gh{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface-2);border-bottom:1px solid var(--border)}
@@ -506,6 +512,23 @@ dialog::backdrop{background:rgba(6,12,18,.55);backdrop-filter:blur(2px)}
       <span id="entryCount"></span>
     </div>
   </section>
+
+  <section class="card">
+    <div class="card-head">
+      <h2>Order history <span class="hint" id="orderCount"></span></h2>
+      <button class="btn outline" id="ordersCsv">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+        Download CSV
+      </button>
+    </div>
+    <div class="table-wrap" id="ordersWrap">
+      <table>
+        <thead><tr><th>Ordered</th><th>Gas</th><th class="num">Qty</th><th>Requested by</th><th>Status</th><th>Received</th><th>Room</th><th>Note</th></tr></thead>
+        <tbody id="orderRows"></tbody>
+      </table>
+    </div>
+    <div class="foot"><span>Every "Done" on a request is logged here and kept in the shared database. The log is also copied into the GitHub repository (<code>data/orders.csv</code>) once a day.</span></div>
+  </section>
 </main>
 
 <!-- Add / Edit dialog -->
@@ -702,9 +725,9 @@ let editingId = null;
 function load(){
   try{
     const raw = localStorage.getItem(STORE_KEY);
-    if(raw){ const s = JSON.parse(raw); if(s && Array.isArray(s.entries)) return { entries:s.entries, customGases:s.customGases||[], requests:Array.isArray(s.requests)?s.requests:[] }; }
+    if(raw){ const s = JSON.parse(raw); if(s && Array.isArray(s.entries)) return { entries:s.entries, customGases:s.customGases||[], requests:Array.isArray(s.requests)?s.requests:[], orders:Array.isArray(s.orders)?s.orders:[] }; }
   }catch(e){}
-  return { entries:[], customGases:[], requests:[] };
+  return { entries:[], customGases:[], requests:[], orders:[] };
 }
 function saveLocal(){
   try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }catch(e){ toast('Could not save to this browser'); }
@@ -797,12 +820,32 @@ function render(){
           <span class="chip">${cylSVG(g.color)}<span>${g.label}</span><span class="cnt">${r.count}</span></span>
           <span class="who"><b>${escapeHtml(r.name)}</b> <span class="when">· ${fmtDate(r.created)}</span>${r.stage==='waiting' ? ` <span class="stage">· ordered ${fmtDate(r.orderedAt || r.created)}</span>` : ''}</span>
           <span class="acts">${r.stage==='waiting'
-            ? `<button type="button" class="done waiting" data-deliver="${r.id}" title="Cylinders arrived: add them to a room">Waiting for delivery</button>`
+            ? `<button type="button" class="done waiting" data-deliver="${r.id}" title="Cylinders arrived: add them to a room">Waiting for delivery</button><button type="button" class="undo" data-rollback="${r.id}" title="Undo: this was not ordered">Not ordered yet</button>`
             : `<button type="button" class="done" data-done="${r.id}" title="Request handled / ordered">Done</button>`}
             <button type="button" class="rx" data-remove="${r.id}" title="Remove request" aria-label="Remove request">×</button></span>
           ${r.note ? `<span class="rnote">${escapeHtml(r.note)}</span>` : ''}
         </div>`;
       }).join('') : '<div class="empty">No open requests. Use Request to ask for new cylinders.</div>');
+
+  // order history (newest first)
+  const orders = (state.orders || []).slice().sort((a,b)=> b.orderedAt - a.orderedAt);
+  document.getElementById('orderCount').textContent = orders.length ? `· ${orders.length} order${orders.length>1?'s':''}` : '';
+  document.getElementById('orderRows').innerHTML = ordersBlocked
+    ? '<tr><td colspan="8" class="muted" style="text-align:center;padding:20px;color:var(--danger)">Order history cannot be read yet — the database rules need the <code>orders</code> read rule from firebase.rules.json.</td></tr>'
+    : (orders.length ? orders.map(o => {
+        const g = gasById(o.gas), lab = o.lab ? (LABS[o.lab] || { num:o.lab, name:'' }) : null;
+        const st = { ordered:'Ordered', received:'Received', removed:'Removed' }[o.status] || o.status;
+        return `<tr>
+          <td class="muted">${fmtDate(o.orderedAt)}</td>
+          <td><span class="gas-cell">${cylSVG(g.color)}<span>${g.label}</span></span></td>
+          <td class="num">${o.count}</td>
+          <td>${escapeHtml(o.name || '')}</td>
+          <td><span class="badge ${o.status}"><i></i>${st}</span></td>
+          <td class="muted">${o.receivedAt ? fmtDate(o.receivedAt) : ''}</td>
+          <td class="lab-cell">${lab ? `<b>${lab.num}</b> ${lab.name}` : ''}</td>
+          <td class="muted">${escapeHtml(o.note || '')}</td>
+        </tr>`;
+      }).join('') : '<tr><td colspan="8" class="muted" style="text-align:center;padding:20px">No orders yet. Press Done on a request when it has been ordered.</td></tr>');
 
   // legend
   const used = new Set(state.entries.map(e=>e.gas));
@@ -917,6 +960,8 @@ document.getElementById('form').addEventListener('submit', ev => {
     if(same){ same.count += count; same.updated = Date.now(); }
     else state.entries.push({ id:uid(), ...entry });
     if(deliverRequest){
+      const o = (state.orders || []).find(o => o.id === deliverRequest.orderId);
+      if(o){ o.status = 'received'; o.receivedAt = Date.now(); o.lab = entry.lab; o.receivedCount = count; o.receivedStatus = status; }
       state.requests = (state.requests || []).filter(x=>x.id!==deliverRequest.id);
       toast(`Delivered: ${count} × ${gasById(gasId).label} added to ${LABS[entry.lab].num}, request from ${deliverRequest.name} closed`);
       deliverRequest = null;
@@ -1020,11 +1065,19 @@ document.getElementById('reqForm').addEventListener('submit', ev => {
 for(const id of ['reqCancel','reqClose']) document.getElementById(id).addEventListener('click', ()=>reqDlg.close());
 reqDlg.addEventListener('click', e => { if(e.target===reqDlg) reqDlg.close(); });
 document.getElementById('reqList').addEventListener('click', e => {
-  const done = e.target.closest('[data-done]'), deliver = e.target.closest('[data-deliver]'), remove = e.target.closest('[data-remove]');
+  const done = e.target.closest('[data-done]'), deliver = e.target.closest('[data-deliver]'), remove = e.target.closest('[data-remove]'), rollback = e.target.closest('[data-rollback]');
   if(done) requirePin(() => {
     const r = (state.requests || []).find(x=>x.id===done.dataset.done); if(!r) return;
-    r.stage = 'waiting'; r.orderedAt = Date.now();
+    const order = { id: uid(), requestId: r.id, gas: r.gas, count: r.count, name: r.name, note: r.note || '', requestedAt: r.created, orderedAt: Date.now(), status: 'ordered' };
+    state.orders = (state.orders || []).concat([order]);
+    r.stage = 'waiting'; r.orderedAt = order.orderedAt; r.orderId = order.id;
     save(); render(); toast(`${gasById(r.gas).label} × ${r.count} marked as ordered — waiting for delivery`);
+  });
+  else if(rollback) requirePin(() => {
+    const r = (state.requests || []).find(x=>x.id===rollback.dataset.rollback); if(!r) return;
+    state.orders = (state.orders || []).filter(o => o.id !== r.orderId);   // a mis-click is not an order: drop the log entry
+    delete r.stage; delete r.orderedAt; delete r.orderId;
+    save(); render(); toast(`${gasById(r.gas).label} × ${r.count} back to "not ordered yet"`);
   });
   else if(deliver) requirePin(() => {
     const r = (state.requests || []).find(x=>x.id===deliver.dataset.deliver); if(!r) return;
@@ -1032,9 +1085,24 @@ document.getElementById('reqList').addEventListener('click', e => {
   });
   else if(remove) requirePin(() => {
     const r = (state.requests || []).find(x=>x.id===remove.dataset.remove); if(!r) return;
+    const o = (state.orders || []).find(o => o.id === r.orderId); if(o){ o.status = 'removed'; o.closedAt = Date.now(); }
     state.requests = state.requests.filter(x=>x.id!==r.id);
     save(); render(); toast(`Request from ${r.name} removed`);
   });
+});
+
+document.getElementById('ordersCsv').addEventListener('click', () => {
+  const iso = t => t ? new Date(t).toISOString() : '';
+  const q = v => '"' + String(v ?? '').replace(/"/g,'""') + '"';
+  const rows = [['ordered_at','gas','gas_name','quantity','requested_by','status','requested_at','received_at','room','received_quantity','received_status','note','order_id']];
+  for(const o of (state.orders || []).slice().sort((a,b)=> a.orderedAt - b.orderedAt)){
+    const g = gasById(o.gas);
+    rows.push([iso(o.orderedAt), g.label.replace(/[₀-₉]/g, c => '₀₁₂₃₄₅₆₇₈₉'.indexOf(c)), g.name, o.count, o.name, o.status, iso(o.requestedAt), iso(o.receivedAt), o.lab || '', o.receivedCount ?? '', o.receivedStatus ? STATUS[o.receivedStatus] : '', o.note || '', o.id]);
+  }
+  const blob = new Blob(['\ufeff' + rows.map(r => r.map(q).join(',')).join('\n')], { type:'text/csv;charset=utf-8' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = `koros-gas-orders-${new Date().toISOString().slice(0,10)}.csv`; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
 });
 
 /* ---------- per-room editor ---------- */
@@ -1214,7 +1282,7 @@ function openReview(result){
 }
 document.getElementById('reviewApply').addEventListener('click', () => requirePin(() => {
   if(!pendingImport || pendingImport.errors.length) return;
-  state = { entries: pendingImport.entries, customGases: state.customGases.concat(pendingImport.newGases), requests: state.requests || [] };
+  state = { entries: pendingImport.entries, customGases: state.customGases.concat(pendingImport.newGases), requests: state.requests || [], orders: state.orders || [] };
   document.getElementById('publishBanner').hidden = true;
   save(); render(); reviewDlg.close(); pendingImport = null;
   toast('Inventory imported');
@@ -1287,8 +1355,9 @@ let remoteReady = false;     // first snapshot received
 let pendingPush = false;
 let lastRemote = null;    // deep copy of the last snapshot from the shared board
 let requestsBlocked = false; // true when the database rules do not allow reading board/requests yet
+let ordersBlocked = false;   // same for board/orders
 function setRemotePart(key, val){
-  if(!lastRemote) lastRemote = { entries: clone(state.entries), customGases: clone(state.customGases), requests: clone(state.requests || []) };
+  if(!lastRemote) lastRemote = { entries: clone(state.entries), customGases: clone(state.customGases), requests: clone(state.requests || []), orders: clone(state.orders || []) };
   lastRemote[key] = clone(val);
 }
 const clone = v => JSON.parse(JSON.stringify(v));
@@ -1363,7 +1432,7 @@ async function pushRemote(){
   const pin = getPin();
   if(!pin){ pendingPush = true; openPin(); return; }
   // Capture the payload now: a rejected attempt makes the SDK revert local state to the server copy.
-  const payload = { entries: clone(state.entries), customGases: clone(state.customGases), requests: clone(state.requests || []) };
+  const payload = { entries: clone(state.entries), customGases: clone(state.customGases), requests: clone(state.requests || []), orders: clone(state.orders || []) };
   // The console may store the PIN as a string or a number; the rule compares type too, so try both.
   let candidates = /^\d+$/.test(pin) ? [pin, Number(pin)] : [pin];
   if(acceptedPin !== null && candidates.some(c => c === acceptedPin)) candidates = [acceptedPin];
@@ -1417,6 +1486,12 @@ async function initRemote(){
       requestsBlocked = false;
       if(document.getElementById('publishBanner').hidden){ state.requests = incoming; saveLocal(); render(); }
     }, err => { requestsBlocked = true; render(); });
+    onValue(ref(db, 'board/orders'), snap => {
+      const incoming = toArray(snap.val());
+      setRemotePart('orders', incoming);
+      ordersBlocked = false;
+      if(document.getElementById('publishBanner').hidden){ state.orders = incoming; saveLocal(); render(); }
+    }, err => { ordersBlocked = true; render(); });
     onValue(ref(db, '.info/connected'), snap => setSync(snap.val() ? 'live' : 'offline', snap.val() ? 'Live · shared board' : 'Offline · reconnecting'));
   }catch(err){
     remote = null; setSync('offline','Shared board unavailable');
@@ -1424,7 +1499,7 @@ async function initRemote(){
   }
 }
 document.getElementById('publishLocal').addEventListener('click', ()=>{ document.getElementById('publishBanner').hidden = true; pushRemote(); });
-document.getElementById('discardLocal').addEventListener('click', ()=>{ document.getElementById('publishBanner').hidden = true; state = { entries:[], customGases:[], requests: state.requests || [] }; saveLocal(); render(); });
+document.getElementById('discardLocal').addEventListener('click', ()=>{ document.getElementById('publishBanner').hidden = true; state = { entries:[], customGases:[], requests: state.requests || [], orders: state.orders || [] }; saveLocal(); render(); });
 
 render();
 initRemote();
