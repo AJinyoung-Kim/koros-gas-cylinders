@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Koros Lab Gas Cylinders</title>
+<title>Koros Group Gas Cylinder Status</title>
 <meta name="description" content="Live overview of gas cylinders stored in each Koros Lab room.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='9' y='6' width='14' height='24' rx='4' fill='%232a78d6'/%3E%3Crect x='13' y='2' width='6' height='5' rx='1.5' fill='%231b4f8a'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,55 +12,70 @@
 <style>
 :root{
   color-scheme:light;
-  --bg:#f3f5f7;
+  --bg:#f7f5f2;
   --surface:#ffffff;
-  --surface-2:#f7f9fb;
-  --border:#e1e6eb;
-  --border-strong:#c9d1d9;
-  --text:#0f1720;
-  --text-2:#4b5563;
-  --text-3:#8a94a0;
-  --brand:#155e75;
-  --brand-2:#0e4a5c;
-  --brand-ink:#ffffff;
-  --accent:#2a78d6;
-  --danger:#c2410c;
-  --room:#155e75;
-  --room-ink:#ffffff;
-  --room-sub:#f8e71c;
-  --corridor:#d5dde4;
-  --status-new:#1a8f5c;
-  --status-inuse:#2a78d6;
-  --status-used:#a1652c;
-  --status-new-bg:#e3f5ec;
-  --status-inuse-bg:#e4eefb;
-  --status-used-bg:#f6ebe0;
-  --shadow:0 1px 2px rgba(15,23,32,.06),0 8px 24px -12px rgba(15,23,32,.18);
-  --radius:14px;
+  --surface-2:#faf8f5;
+  --border:#e8e3dc;
+  --border-strong:#d6cfc6;
+  --text:#2b2f3a;
+  --text-2:#5d6473;
+  --text-3:#9097a3;
+  --brand:#4f8a96;
+  --brand-2:#3e7480;
+  --accent:#7ea8dc;
+  --danger:#c96a5a;
+  --head-1:#dfe9f4;
+  --head-2:#e8def3;
+  --head-3:#d8ede8;
+  --head-ink:#2b2f3a;
+  --head-sub:#5d6473;
+  --head-btn:rgba(255,255,255,.7);
+  --head-btn-border:rgba(43,47,58,.12);
+  --room:#e4f0ef;
+  --room-border:#cfe1df;
+  --room-num:#2f5f68;
+  --room-name:#5c8790;
+  --room-badge:#ffffff;
+  --corridor:#efece7;
+  --corridor-line:#d9d3ca;
+  --status-new:#3f9a72;
+  --status-inuse:#5b8fd6;
+  --status-used:#c4875a;
+  --status-new-bg:#e2f4ea;
+  --status-inuse-bg:#e4edfa;
+  --status-used-bg:#f9ebdf;
+  --shadow:0 1px 2px rgba(43,47,58,.05),0 10px 28px -14px rgba(43,47,58,.16);
+  --radius:16px;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     color-scheme:dark;
-    --bg:#0f1418; --surface:#171d23; --surface-2:#1d252c;
-    --border:#2a333c; --border-strong:#3a4650;
-    --text:#f1f4f7; --text-2:#b7c0c9; --text-3:#7f8b96;
-    --brand:#0f4b5e; --brand-2:#0b3a49;
-    --room:#186a83; --corridor:#2b3640;
-    --status-new:#3dc283; --status-inuse:#5b9cf0; --status-used:#d69a5d;
-    --status-new-bg:#123526; --status-inuse-bg:#16294a; --status-used-bg:#3a2a18;
-    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -12px rgba(0,0,0,.6);
+    --bg:#15181e; --surface:#1d2128; --surface-2:#232830;
+    --border:#2f353f; --border-strong:#414957;
+    --text:#eef0f4; --text-2:#b4bbc7; --text-3:#7f8794;
+    --brand:#5d9aa6; --brand-2:#4a8591; --accent:#8db4e6;
+    --head-1:#1f2a36; --head-2:#25213a; --head-3:#1d2f2e;
+    --head-ink:#eef0f4; --head-sub:#b4bbc7; --head-btn:rgba(255,255,255,.08); --head-btn-border:rgba(255,255,255,.16);
+    --room:#213437; --room-border:#2f4a4d; --room-num:#cfe6e4; --room-name:#8fbdc0; --room-badge:#2c4548;
+    --corridor:#1b1f26; --corridor-line:#3a414c;
+    --status-new:#6cc79a; --status-inuse:#8db4e6; --status-used:#dba579;
+    --status-new-bg:#1d3a2c; --status-inuse-bg:#1f2f47; --status-used-bg:#3d2c1e;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 28px -14px rgba(0,0,0,.6);
   }
 }
 :root[data-theme="dark"]{
-  color-scheme:dark;
-  --bg:#0f1418; --surface:#171d23; --surface-2:#1d252c;
-  --border:#2a333c; --border-strong:#3a4650;
-  --text:#f1f4f7; --text-2:#b7c0c9; --text-3:#7f8b96;
-  --brand:#0f4b5e; --brand-2:#0b3a49;
-  --room:#186a83; --corridor:#2b3640;
-  --status-new:#3dc283; --status-inuse:#5b9cf0; --status-used:#d69a5d;
-  --status-new-bg:#123526; --status-inuse-bg:#16294a; --status-used-bg:#3a2a18;
-  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -12px rgba(0,0,0,.6);
+    color-scheme:dark;
+  --bg:#15181e; --surface:#1d2128; --surface-2:#232830;
+  --border:#2f353f; --border-strong:#414957;
+  --text:#eef0f4; --text-2:#b4bbc7; --text-3:#7f8794;
+  --brand:#5d9aa6; --brand-2:#4a8591; --accent:#8db4e6;
+  --head-1:#1f2a36; --head-2:#25213a; --head-3:#1d2f2e;
+  --head-ink:#eef0f4; --head-sub:#b4bbc7; --head-btn:rgba(255,255,255,.08); --head-btn-border:rgba(255,255,255,.16);
+  --room:#213437; --room-border:#2f4a4d; --room-num:#cfe6e4; --room-name:#8fbdc0; --room-badge:#2c4548;
+  --corridor:#1b1f26; --corridor-line:#3a414c;
+  --status-new:#6cc79a; --status-inuse:#8db4e6; --status-used:#dba579;
+  --status-new-bg:#1d3a2c; --status-inuse-bg:#1f2f47; --status-used-bg:#3d2c1e;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 28px -14px rgba(0,0,0,.6);
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
@@ -76,49 +91,57 @@ button{cursor:pointer}
 
 /* ---------- header ---------- */
 header.top{
-  background:linear-gradient(135deg,var(--brand) 0%,var(--brand-2) 100%);
-  color:var(--brand-ink);
-  padding:28px 0 26px;
+  background:linear-gradient(120deg,var(--head-1) 0%,var(--head-2) 55%,var(--head-3) 100%);
+  color:var(--head-ink);
+  padding:34px 0 30px;
   position:relative; overflow:hidden;
+  border-bottom:1px solid var(--border);
+}
+header.top::before{
+  content:""; position:absolute; left:-8%; top:-70%; width:420px; height:420px; border-radius:50%;
+  background:radial-gradient(circle,rgba(255,255,255,.55),rgba(255,255,255,0) 70%); pointer-events:none;
 }
 header.top::after{
-  content:""; position:absolute; inset:auto -10% -60% auto; width:520px; height:520px;
-  border-radius:50%; background:rgba(255,255,255,.06); pointer-events:none;
+  content:""; position:absolute; right:-6%; bottom:-70%; width:520px; height:520px; border-radius:50%;
+  background:radial-gradient(circle,rgba(255,255,255,.45),rgba(255,255,255,0) 70%); pointer-events:none;
 }
-.top-row{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
-.title-block h1{margin:0;font-size:clamp(22px,3.2vw,30px);font-weight:800;letter-spacing:-.02em;line-height:1.15}
-.title-block .sub{margin:6px 0 0;color:rgba(255,255,255,.72);font-size:14px}
+.top-row{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;position:relative}
+.title-block h1{margin:0;font-size:clamp(28px,4.4vw,44px);font-weight:800;letter-spacing:-.03em;line-height:1.1}
+.title-block .sub{margin:10px 0 0;color:var(--head-sub);font-size:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .top-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .btn{
   display:inline-flex;align-items:center;gap:8px;
-  border:1px solid transparent;border-radius:10px;padding:10px 14px;
-  font-weight:600;font-size:14px;line-height:1;transition:transform .08s,background .15s,border-color .15s;
+  border:1px solid transparent;border-radius:12px;padding:10px 14px;
+  font-weight:600;font-size:14px;line-height:1;transition:transform .08s,background .15s,border-color .15s,box-shadow .15s;
   background:var(--surface);color:var(--text);
 }
 .btn:active{transform:translateY(1px)}
-.btn.primary{background:#ffffff;color:var(--brand-2)}
-.btn.primary:hover{background:#eaf4f8}
-.btn.ghost{background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.22)}
-.btn.ghost:hover{background:rgba(255,255,255,.2)}
+.btn.primary{background:var(--brand);color:#fff;box-shadow:0 6px 16px -8px rgba(63,116,128,.6)}
+.btn.primary:hover{background:var(--brand-2)}
+.btn.ghost{background:var(--head-btn);color:var(--head-ink);border-color:var(--head-btn-border);backdrop-filter:blur(6px)}
+.btn.ghost:hover{background:var(--surface)}
 .btn.outline{background:transparent;border-color:var(--border-strong);color:var(--text-2)}
 .btn.outline:hover{background:var(--surface-2)}
 .btn.danger{background:transparent;border-color:var(--danger);color:var(--danger)}
-.btn.danger:hover{background:rgba(194,65,12,.08)}
+.btn.danger:hover{background:rgba(201,106,90,.08)}
 .btn svg{width:16px;height:16px}
 .btn.icon{padding:10px;width:38px;height:38px;justify-content:center}
 
-.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:22px}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:26px;position:relative}
 .stat{
-  background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.18);
-  border-radius:12px;padding:12px 14px;backdrop-filter:blur(4px);
+  background:rgba(255,255,255,.72);border:1px solid rgba(255,255,255,.9);
+  border-radius:14px;padding:14px 16px;backdrop-filter:blur(6px);box-shadow:0 8px 24px -16px rgba(43,47,58,.25);
 }
-.stat .k{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.75);font-weight:600;display:flex;align-items:center;gap:6px}
+:root[data-theme="dark"] .stat{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.1)}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .stat{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.1)} }
+.stat .k{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-2);font-weight:600;display:flex;align-items:center;gap:6px}
 .stat .k i{width:8px;height:8px;border-radius:50%;display:inline-block;background:currentColor}
-.stat .v{font-size:30px;font-weight:800;letter-spacing:-.02em;margin-top:2px;font-variant-numeric:tabular-nums;line-height:1.1}
-.stat.total{background:rgba(255,255,255,.18)}
-.stat.new .k i{color:#7ee2b0}
-.stat.inuse .k i{color:#9cc4f5}
-.stat.used .k i{color:#f2c08c}
+.stat .v{font-size:32px;font-weight:800;letter-spacing:-.02em;margin-top:2px;font-variant-numeric:tabular-nums;line-height:1.1;color:var(--text)}
+.stat.total{background:var(--brand);border-color:transparent}
+.stat.total .k,.stat.total .v{color:#fff}
+.stat.new .k i{color:var(--status-new)}
+.stat.inuse .k i{color:var(--status-inuse)}
+.stat.used .k i{color:var(--status-used)}
 
 /* ---------- sections ---------- */
 main{padding:22px 0 60px}
@@ -127,43 +150,58 @@ section.card{
   box-shadow:var(--shadow);padding:18px;margin-bottom:18px;
 }
 .card-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
-.card-head h2{margin:0;font-size:16px;font-weight:700;letter-spacing:-.01em}
+.card-head h2{margin:0;font-size:17px;font-weight:700;letter-spacing:-.01em}
 .card-head .hint{color:var(--text-3);font-size:13px}
 
 /* ---------- floor map ---------- */
 .map{
-  position:relative;width:100%;aspect-ratio:1.95/1;
-  background:var(--surface-2);border:1px solid var(--border);border-radius:12px;overflow:hidden;
+  display:grid;gap:12px;
+  grid-template-columns:minmax(150px,1fr) 40px minmax(160px,1.1fr) minmax(0,.5fr) minmax(210px,1.5fr) minmax(230px,1.8fr);
+  grid-template-rows:auto 40px auto;
+  grid-template-areas:
+    "sum  sum   sum  .    r472 r474"
+    "r460 vhall hall hall hall hall"
+    "r460 vhall r458 .    .    .";
+  background:var(--surface-2);border:1px solid var(--border);border-radius:14px;padding:14px;
 }
-.map svg.floor{position:absolute;inset:0;width:100%;height:100%}
 .room{
-  position:absolute;background:var(--room);color:var(--room-ink);
-  border-radius:10px;padding:10px 10px 8px;display:flex;flex-direction:column;gap:6px;
-  box-shadow:0 2px 0 rgba(0,0,0,.15) inset,0 6px 18px -8px rgba(0,0,0,.45);
-  cursor:pointer;transition:outline-color .15s,transform .12s;outline:3px solid transparent;outline-offset:2px;
+  background:var(--room);color:var(--text);border:1px solid var(--room-border);
+  border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:8px;
+  min-height:150px;cursor:pointer;transition:box-shadow .15s,transform .12s,border-color .15s;
 }
-.room:hover{transform:translateY(-1px)}
-.room.active{outline-color:var(--accent)}
+.room:hover{transform:translateY(-1px);box-shadow:var(--shadow)}
+.room.active{border-color:var(--accent);box-shadow:0 0 0 3px rgba(126,168,220,.35)}
 .room .rh{display:flex;align-items:center;gap:8px;flex-wrap:wrap;line-height:1.1}
-.room .name{flex-basis:100%;order:3;margin-top:-2px}
-.room .num{font-size:clamp(15px,1.9vw,22px);font-weight:800;letter-spacing:-.02em}
-.room .name{font-size:clamp(11px,1.15vw,13px);font-weight:600;color:var(--room-sub)}
-.room .total{margin-left:auto;font-size:12px;font-weight:600;background:rgba(255,255,255,.16);padding:2px 8px;border-radius:999px;font-variant-numeric:tabular-nums}
-.room .chips{display:flex;flex-wrap:wrap;gap:5px;align-content:flex-start;overflow:auto;flex:1;min-height:0;scrollbar-width:thin}
-.room .empty{font-size:12px;color:rgba(255,255,255,.55);font-style:italic}
+.room .num{font-size:22px;font-weight:800;letter-spacing:-.02em;color:var(--room-num)}
+.room .name{flex-basis:100%;order:3;margin-top:-2px;font-size:13px;font-weight:600;color:var(--room-name)}
+.room .total{margin-left:auto;font-size:12px;font-weight:700;background:var(--room-badge);color:var(--room-num);padding:3px 9px;border-radius:999px;font-variant-numeric:tabular-nums;border:1px solid var(--room-border)}
+.room .chips{display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start}
+.room .empty{font-size:12px;color:var(--text-3);font-style:italic}
 .chip{
   display:inline-flex;align-items:center;gap:5px;
-  background:rgba(255,255,255,.94);color:#0f1720;border-radius:8px;padding:3px 7px 3px 4px;
-  font-size:12px;font-weight:600;line-height:1;white-space:nowrap;position:relative;
+  background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:9px;padding:4px 8px 4px 5px;
+  font-size:12.5px;font-weight:600;line-height:1;white-space:nowrap;position:relative;
 }
 .chip .cyl{width:12px;height:18px;flex:none}
-.chip .cnt{font-variant-numeric:tabular-nums;color:#0f1720}
-.chip .cnt::before{content:"×";color:#8a94a0;margin-right:1px;font-weight:500}
+.chip .cnt{font-variant-numeric:tabular-nums}
+.chip .cnt::before{content:"×";color:var(--text-3);margin-right:1px;font-weight:500}
 .chip .dots{display:inline-flex;gap:2px;margin-left:2px}
 .chip .dots i{width:5px;height:5px;border-radius:50%;display:inline-block}
 .chip .dots i.new{background:var(--status-new)}
 .chip .dots i.inuse{background:var(--status-inuse)}
 .chip .dots i.used{background:var(--status-used)}
+#room-460{grid-area:r460} #room-458{grid-area:r458} #room-472{grid-area:r472} #room-474{grid-area:r474}
+.summary{grid-area:sum;background:var(--surface);border:1px dashed var(--border-strong);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:8px}
+.summary .sh{display:flex;align-items:center;gap:8px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);font-weight:700}
+.summary .chips{display:flex;flex-wrap:wrap;gap:6px}
+.corridor{background:var(--corridor);border-radius:10px;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.corridor span{font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--text-3);font-weight:700;background:var(--corridor);padding:0 8px;position:relative;z-index:1}
+.corridor::before{content:"";position:absolute;background:repeating-linear-gradient(90deg,var(--corridor-line) 0 10px,transparent 10px 18px)}
+.corridor.h{grid-area:hall}
+.corridor.h::before{left:12px;right:12px;top:50%;height:2px;transform:translateY(-50%)}
+.corridor.v{grid-area:vhall}
+.corridor.v span{transform:rotate(-90deg);white-space:nowrap}
+.corridor.v::before{top:12px;bottom:12px;left:50%;width:2px;transform:translateX(-50%);background:repeating-linear-gradient(180deg,var(--corridor-line) 0 10px,transparent 10px 18px)}
 /* tooltip */
 .tip{
   position:fixed;z-index:50;pointer-events:none;background:var(--text);color:var(--bg);
@@ -174,20 +212,15 @@ section.card{
 .tip b{font-weight:700}
 .tip .row{display:flex;justify-content:space-between;gap:14px}
 
-/* room placements (percent of map box) */
-#room-460{left:2.2%;top:28.5%;width:14%;height:66%}
-#room-458{left:22%;top:36%;width:15%;height:52%}
-#room-472{left:52%;top:2.5%;width:14.5%;height:26%}
-#room-474{left:73%;top:2.5%;width:25%;height:26%}
-
+@media (max-width:900px){
+  .map{grid-template-columns:1fr 1fr;grid-template-rows:auto;grid-template-areas:"sum sum" "r460 r458" "r472 r474"}
+  .corridor{display:none}
+}
 @media (max-width:700px){
-  .map{aspect-ratio:auto;padding:12px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  .map svg.floor{display:none}
-  .map > .room{position:static!important;left:auto!important;top:auto!important;width:auto!important;height:auto!important;min-height:130px}
   .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
   .stat .v{font-size:26px}
 }
-@media (max-width:460px){.map{grid-template-columns:1fr}}
+@media (max-width:560px){.map{grid-template-columns:1fr;grid-template-areas:"sum" "r460" "r458" "r472" "r474"}}
 
 /* legend */
 .legend{display:flex;flex-wrap:wrap;gap:8px 14px;margin-top:12px;align-items:center}
@@ -270,11 +303,11 @@ dialog::backdrop{background:rgba(6,12,18,.55);backdrop-filter:blur(2px)}
 }
 .toast.show{opacity:1;transform:translate(-50%,0)}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
-.pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:3px 10px 3px 8px;font-size:12px;font-weight:600;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);color:#fff;cursor:pointer;vertical-align:middle}
+.pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:3px 10px 3px 8px;font-size:12px;font-weight:600;background:var(--head-btn);border:1px solid var(--head-btn-border);color:var(--head-ink);cursor:pointer;vertical-align:middle}
 .pill i{width:7px;height:7px;border-radius:50%;background:#9aa4ad}
-.pill.live i{background:#4ade80;box-shadow:0 0 0 3px rgba(74,222,128,.25)}
-.pill.offline i{background:#f87171}
-.pill.connecting i{background:#fbbf24}
+.pill.live i{background:var(--status-new);box-shadow:0 0 0 3px rgba(63,154,114,.25)}
+.pill.offline i{background:var(--danger)}
+.pill.connecting i{background:#e2b34a}
 .banner{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:var(--status-inuse-bg);border:1px solid var(--accent);color:var(--text);border-radius:12px;padding:12px 14px;margin-bottom:18px;font-size:14px}
 .banner .btn{background:var(--brand);color:#fff}
 .pin-help{font-size:13px;color:var(--text-2);margin:0}
@@ -286,8 +319,8 @@ dialog::backdrop{background:rgba(6,12,18,.55);backdrop-filter:blur(2px)}
   <div class="wrap">
     <div class="top-row">
       <div class="title-block">
-        <h1>Koros Lab Gas Cylinders Status</h1>
-        <p class="sub">Rooms 458 · 460 · 472 · 474–475 &nbsp;·&nbsp; <span id="lastUpdated">No records yet</span> &nbsp;·&nbsp; <button class="pill" id="syncPill" title="Sync status"><i></i><span>Local only</span></button></p>
+        <h1>Koros Group Gas Cylinder Status</h1>
+        <p class="sub"><span>Rooms 458 · 460 · 472 · 474–475</span><span aria-hidden="true">·</span><span id="lastUpdated">No records yet</span><button class="pill" id="syncPill" title="Sync status"><i></i><span>Local only</span></button></p>
       </div>
       <div class="top-actions">
         <button class="btn ghost icon" id="themeBtn" title="Toggle dark mode" aria-label="Toggle dark mode">
@@ -329,22 +362,9 @@ dialog::backdrop{background:rgba(6,12,18,.55);backdrop-filter:blur(2px)}
       <span class="hint">Click a room to filter the list · hover a chip for the New / In use / Used breakdown</span>
     </div>
     <div class="map" id="map">
-      <svg class="floor" viewBox="0 0 1000 513" preserveAspectRatio="none" aria-hidden="true">
-        <!-- corridors -->
-        <line x1="162" y1="146" x2="1000" y2="146" stroke="var(--corridor)" stroke-width="3"/>
-        <line x1="220" y1="185" x2="1000" y2="185" stroke="var(--corridor)" stroke-width="3"/>
-        <line x1="180" y1="146" x2="180" y2="513" stroke="var(--corridor)" stroke-width="3"/>
-        <line x1="1000" y1="146" x2="1000" y2="185" stroke="var(--corridor)" stroke-width="3"/>
-        <text x="600" y="170" font-size="12" fill="var(--text-3)" font-weight="600" letter-spacing="3" text-anchor="middle" font-family="Inter,sans-serif">CORRIDOR</text>
-        <text x="184" y="500" font-size="11" fill="var(--text-3)" font-weight="600" letter-spacing="2" font-family="Inter,sans-serif" transform="rotate(-90 184 500)">CORRIDOR</text>
-      </svg>
-      <div class="room" id="room-460" data-lab="460" role="button" tabindex="0" aria-label="Room 460 Sorption Lab">
-        <div class="rh"><span class="num">460</span><span class="name">Sorption Lab</span><span class="total" data-total></span></div>
-        <div class="chips" data-chips></div>
-      </div>
-      <div class="room" id="room-458" data-lab="458" role="button" tabindex="0" aria-label="Room 458 Perm1">
-        <div class="rh"><span class="num">458</span><span class="name">Perm1</span><span class="total" data-total></span></div>
-        <div class="chips" data-chips></div>
+      <div class="summary" id="summary">
+        <div class="sh">All rooms · by gas</div>
+        <div class="chips" data-summary></div>
       </div>
       <div class="room" id="room-472" data-lab="472" role="button" tabindex="0" aria-label="Room 472 Instrument">
         <div class="rh"><span class="num">472</span><span class="name">Instrument</span><span class="total" data-total></span></div>
@@ -352,6 +372,16 @@ dialog::backdrop{background:rgba(6,12,18,.55);backdrop-filter:blur(2px)}
       </div>
       <div class="room" id="room-474" data-lab="474-475" role="button" tabindex="0" aria-label="Room 474-475 Perm2">
         <div class="rh"><span class="num">474–475</span><span class="name">Perm2</span><span class="total" data-total></span></div>
+        <div class="chips" data-chips></div>
+      </div>
+      <div class="corridor h" aria-hidden="true"><span>Corridor</span></div>
+      <div class="corridor v" aria-hidden="true"><span>Corridor</span></div>
+      <div class="room" id="room-460" data-lab="460" role="button" tabindex="0" aria-label="Room 460 Sorption Lab">
+        <div class="rh"><span class="num">460</span><span class="name">Sorption Lab</span><span class="total" data-total></span></div>
+        <div class="chips" data-chips></div>
+      </div>
+      <div class="room" id="room-458" data-lab="458" role="button" tabindex="0" aria-label="Room 458 Perm1">
+        <div class="rh"><span class="num">458</span><span class="name">Perm1</span><span class="total" data-total></span></div>
         <div class="chips" data-chips></div>
       </div>
     </div>
@@ -381,7 +411,7 @@ dialog::backdrop{background:rgba(6,12,18,.55);backdrop-filter:blur(2px)}
     </div>
     <div class="empty-state" id="emptyState" hidden>
       <p>No cylinders recorded yet.</p>
-      <button class="btn primary" id="emptyAdd" style="background:var(--brand);color:#fff">Add the first cylinder</button>
+      <button class="btn primary" id="emptyAdd">Add the first cylinder</button>
       <button class="btn outline" id="sampleBtn">Load sample data</button>
     </div>
     <div class="foot">
@@ -448,7 +478,7 @@ dialog::backdrop{background:rgba(6,12,18,.55);backdrop-filter:blur(2px)}
       <button type="button" class="btn danger" id="deleteBtn" hidden>Delete</button>
       <div class="right">
         <button type="button" class="btn outline" id="cancelBtn">Cancel</button>
-        <button type="submit" class="btn primary" id="saveBtn" style="background:var(--brand);color:#fff">Add</button>
+        <button type="submit" class="btn primary" id="saveBtn">Add</button>
       </div>
     </div>
   </form>
@@ -468,7 +498,7 @@ dialog::backdrop{background:rgba(6,12,18,.55);backdrop-filter:blur(2px)}
       <button type="button" class="btn danger" id="forgetPin" hidden>Forget PIN</button>
       <div class="right">
         <button type="button" class="btn outline" id="pinCancel">Cancel</button>
-        <button type="submit" class="btn primary" style="background:var(--brand);color:#fff">Continue</button>
+        <button type="submit" class="btn primary">Continue</button>
       </div>
     </div>
   </form>
@@ -484,19 +514,19 @@ const THEME_KEY = 'koros-gas-theme';
 
 /* ---------- gas catalogue ---------- */
 const GASES = [
-  { id:'N2',   label:'N₂',      name:'Nitrogen',        color:'#2a78d6' },
-  { id:'CO2',  label:'CO₂',     name:'Carbon dioxide',  color:'#eb6834' },
-  { id:'He',   label:'He',      name:'Helium',          color:'#1baf7a' },
-  { id:'CH4',  label:'CH₄',     name:'Methane',         color:'#eda100' },
-  { id:'O2',   label:'O₂',      name:'Oxygen',          color:'#008300' },
-  { id:'H2',   label:'H₂',      name:'Hydrogen',        color:'#e34948' },
-  { id:'Ar',   label:'Ar',      name:'Argon',           color:'#4a3aa7' },
-  { id:'Air',  label:'Air',     name:'Compressed air',  color:'#e87ba4' },
-  { id:'C3H6', label:'C₃H₆',    name:'Propylene',       color:'#0f8b8d' },
-  { id:'C3H8', label:'C₃H₈',    name:'Propane',         color:'#8a5a2b' },
-  { id:'CO2CH4', label:'CO₂/CH₄', name:'CO₂/CH₄ mix',   color:'#6b7280' },
+  { id:'N2',   label:'N₂',      name:'Nitrogen',        color:'#8db6e6' },
+  { id:'CO2',  label:'CO₂',     name:'Carbon dioxide',  color:'#f2a98a' },
+  { id:'He',   label:'He',      name:'Helium',          color:'#8fd7b7' },
+  { id:'CH4',  label:'CH₄',     name:'Methane',         color:'#f3d67c' },
+  { id:'O2',   label:'O₂',      name:'Oxygen',          color:'#a8d48d' },
+  { id:'H2',   label:'H₂',      name:'Hydrogen',        color:'#f09a9a' },
+  { id:'Ar',   label:'Ar',      name:'Argon',           color:'#b9a8e6' },
+  { id:'Air',  label:'Air',     name:'Compressed air',  color:'#f3b7d3' },
+  { id:'C3H6', label:'C₃H₆',    name:'Propylene',       color:'#8ccfd1' },
+  { id:'C3H8', label:'C₃H₈',    name:'Propane',         color:'#d7b98f' },
+  { id:'CO2CH4', label:'CO₂/CH₄', name:'CO₂/CH₄ mix',   color:'#b9c1cc' },
 ];
-const EXTRA_COLORS = ['#0ea5e9','#a21caf','#65a30d','#b45309','#0f766e','#7c3aed','#be123c','#334155'];
+const EXTRA_COLORS = ['#9fd3e8','#d9a7dc','#c5dc94','#e6b98f','#8fcfc4','#c3b3ee','#ee9fb4','#aab4c4'];
 const LABS = {
   '460':     { num:'460',     name:'Sorption Lab' },
   '458':     { num:'458',     name:'Perm1' },
@@ -530,9 +560,9 @@ function uid(){ return Date.now().toString(36) + Math.random().toString(36).slic
 /* ---------- cylinder icon ---------- */
 function cylSVG(color, cls='cyl'){
   return `<svg class="${cls}" viewBox="0 0 22 34" aria-hidden="true">
-    <rect x="8" y="1" width="6" height="5" rx="1.5" fill="${shade(color,-35)}"/>
+    <rect x="8" y="1" width="6" height="5" rx="1.5" fill="${shade(color,-40)}"/>
     <path d="M4 10 Q4 6 11 6 Q18 6 18 10 V30 Q18 33 15 33 H7 Q4 33 4 30 Z" fill="${color}"/>
-    <rect x="6.5" y="9" width="2.2" height="20" rx="1.1" fill="rgba(255,255,255,.35)"/>
+    <rect x="6.5" y="9" width="2.2" height="20" rx="1.1" fill="rgba(255,255,255,.5)"/>
   </svg>`;
 }
 function shade(hex, pct){
@@ -587,6 +617,16 @@ function render(){
       return `<span class="chip" data-lab="${lab}" data-gas="${id}">${cylSVG(g.color)}<span>${g.label}</span><span class="cnt">${c.total}</span><span class="dots">${dots}</span></span>`;
     }).join('');
   });
+
+  // summary across all rooms
+  const sumAgg = {};
+  for(const e of state.entries){ const g = sumAgg[e.gas] || (sumAgg[e.gas] = { new:0, inuse:0, used:0, total:0 }); g[e.status] += e.count; g.total += e.count; }
+  const sumIds = Object.keys(sumAgg).sort((a,b)=> order.indexOf(a)-order.indexOf(b));
+  document.querySelector('[data-summary]').innerHTML = sumIds.length ? sumIds.map(id => {
+    const g = gasById(id), c = sumAgg[id];
+    const dots = ['new','inuse','used'].filter(s=>c[s]>0).map(s=>`<i class="${s}"></i>`).join('');
+    return `<span class="chip" data-lab="all" data-gas="${id}">${cylSVG(g.color)}<span>${g.label}</span><span class="cnt">${c.total}</span><span class="dots">${dots}</span></span>`;
+  }).join('') : '<span class="empty" style="font-size:12px;color:var(--text-3);font-style:italic">no cylinders yet</span>';
 
   // legend
   const used = new Set(state.entries.map(e=>e.gas));
@@ -732,7 +772,12 @@ document.getElementById('statusSeg').addEventListener('click', e => {
 const tip = document.getElementById('tip');
 document.getElementById('map').addEventListener('mouseover', e => {
   const chip = e.target.closest('.chip'); if(!chip) return;
-  const agg = byLabGas()[chip.dataset.lab][chip.dataset.gas]; const g = gasById(chip.dataset.gas);
+  const g = gasById(chip.dataset.gas);
+  let agg;
+  if(chip.dataset.lab==='all'){
+    agg = { new:0, inuse:0, used:0 };
+    for(const e of state.entries) if(e.gas===chip.dataset.gas) agg[e.status] += e.count;
+  } else agg = byLabGas()[chip.dataset.lab][chip.dataset.gas];
   tip.innerHTML = `<b>${g.label}</b> · ${g.name}<div class="row"><span>New</span><b>${agg.new}</b></div><div class="row"><span>In use</span><b>${agg.inuse}</b></div><div class="row"><span>Used</span><b>${agg.used}</b></div>`;
   tip.classList.add('show'); moveTip(e);
 });

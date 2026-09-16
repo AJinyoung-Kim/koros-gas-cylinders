@@ -1,4 +1,4 @@
-# Koros Lab Gas Cylinders Status
+# Koros Group Gas Cylinder Status
 
 A single-page status board for the gas cylinders stored in the Koros Lab rooms
 (458 Perm1, 460 Sorption Lab, 472 Instrument, 474–475 Perm2).
@@ -8,7 +8,7 @@ A single-page status board for the gas cylinders stored in the Koros Lab rooms
 ## What it does
 
 - Header shows the total cylinder count and the New / In use / Used split.
-- Floor map shows every room with a colored chip per gas (count, plus dots for the status mix). Click a room to filter the list, hover a chip for the breakdown.
+- Floor map shows every room with a pastel chip per gas (count, plus dots for the status mix). Rooms grow with their contents, so nothing is clipped when a room holds many cylinders. An "All rooms" panel sums each gas across the lab. Click a room to filter the list, hover a chip for the breakdown.
 - **Add** (top right) opens a form: gas, quantity, location, status, optional note. Entries update the map and totals immediately.
 - **Edit** on any row changes quantity, status, location or note, or deletes the entry.
 - Gases not in the list can be added with "Other gas…"; they get their own color automatically.
@@ -40,13 +40,15 @@ If a browser already has local data when it first connects to an empty shared bo
 
 ## Gas colors
 
+Pastel palette; every chip also carries the gas label, so color is never the only cue.
+
 | Gas | Color | Gas | Color |
 |-----|-------|-----|-------|
-| N₂ | blue | H₂ | red |
-| CO₂ | orange | Ar | violet |
-| He | aqua | Air | pink |
-| CH₄ | yellow | C₃H₆ | teal |
-| O₂ | green | C₃H₈ | brown |
+| N₂ | sky blue | H₂ | rose |
+| CO₂ | peach | Ar | lavender |
+| He | mint | Air | pink |
+| CH₄ | butter yellow | C₃H₆ | aqua |
+| O₂ | sage green | C₃H₈ | sand |
 | CO₂/CH₄ mix | gray | custom | assigned automatically |
 
 ## Development
