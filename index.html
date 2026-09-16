@@ -174,6 +174,26 @@ section.card{
 .room .rh{display:flex;align-items:center;gap:8px;flex-wrap:wrap;line-height:1.1}
 .room .num{font-size:22px;font-weight:800;letter-spacing:-.02em;color:var(--room-num)}
 .room .name{flex-basis:100%;order:3;margin-top:-2px;font-size:13px;font-weight:600;color:var(--room-name)}
+.rbtn{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--room-border);background:var(--room-badge);color:var(--room-num);border-radius:8px;padding:4px 8px;font-size:12px;font-weight:700;line-height:1;order:2}
+.rbtn svg{width:12px;height:12px}
+.rbtn:hover{background:var(--brand);color:#fff;border-color:var(--brand)}
+.summary .rbtn{display:none}
+dialog.wide{width:min(760px,calc(100vw - 32px))}
+.rrows{display:grid;gap:8px}
+.rrow{display:grid;grid-template-columns:minmax(120px,1.3fr) 76px 110px minmax(120px,1.6fr) 36px;gap:8px;align-items:center}
+.rrow select,.rrow input{width:100%;border:1px solid var(--border-strong);background:var(--surface);border-radius:10px;padding:9px 10px;font-size:14px}
+.rrow input[type=number]{text-align:center;font-weight:700}
+.rrow .r-del{width:36px;height:38px;border:1px solid var(--border-strong);background:var(--surface);border-radius:10px;color:var(--text-3);font-size:18px;line-height:1}
+.rrow .r-del:hover{color:var(--danger);border-color:var(--danger)}
+.rrow .r-gasname{grid-column:1 / -1;display:none}
+.rrow.custom .r-gasname{display:block}
+.rrows-head{display:grid;grid-template-columns:minmax(120px,1.3fr) 76px 110px minmax(120px,1.6fr) 36px;gap:8px;font-size:11.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--text-3);font-weight:700;padding:0 2px}
+.rrows-empty{color:var(--text-3);font-size:13.5px;font-style:italic;padding:6px 2px}
+@media (max-width:640px){
+  .rrows-head{display:none}
+  .rrow{grid-template-columns:1fr 70px 36px;grid-template-areas:"gas qty del" "status note note"}
+  .rrow .r-gas{grid-area:gas} .rrow .r-qty{grid-area:qty} .rrow .r-del{grid-area:del} .rrow .r-status{grid-area:status} .rrow .r-note{grid-area:note}
+}
 .room .total{margin-left:auto;font-size:12px;font-weight:700;background:var(--room-badge);color:var(--room-num);padding:3px 9px;border-radius:999px;font-variant-numeric:tabular-nums;border:1px solid var(--room-border)}
 .room .chips{display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start}
 .room .empty{font-size:12px;color:var(--text-3);font-style:italic}
@@ -258,6 +278,17 @@ th.num{text-align:right}
 .empty-state p{margin:0 0 12px}
 .empty-state .btn{margin:0 4px}
 .foot{color:var(--text-3);font-size:12.5px;margin-top:14px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.foot a{color:var(--brand);font-weight:600;text-decoration:none}
+.foot a:hover{text-decoration:underline}
+.review{display:grid;gap:10px}
+.review .sum{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.review .sum div{background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center}
+.review .sum b{display:block;font-size:22px;font-weight:800;font-variant-numeric:tabular-nums}
+.review .sum span{font-size:12px;color:var(--text-2);font-weight:600}
+.review ul{margin:0;padding:0 0 0 18px;font-size:13px;line-height:1.5;max-height:180px;overflow:auto}
+.review ul.err li{color:var(--danger)}
+.review ul.warn li{color:var(--status-used)}
+.review .ok{font-size:13.5px;color:var(--text-2)}
 
 /* ---------- modal ---------- */
 dialog{
@@ -334,7 +365,7 @@ dialog::backdrop{background:rgba(6,12,18,.55);backdrop-filter:blur(2px)}
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="m7 8 5-5 5 5"/><path d="M5 21h14"/></svg>
           Import
         </button>
-        <input type="file" id="importFile" accept="application/json" class="sr">
+        <input type="file" id="importFile" accept=".txt,.json,text/plain,application/json" class="sr">
         <button class="btn primary" id="addBtn">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
           Add
@@ -367,21 +398,21 @@ dialog::backdrop{background:rgba(6,12,18,.55);backdrop-filter:blur(2px)}
         <div class="chips" data-summary></div>
       </div>
       <div class="room" id="room-472" data-lab="472" role="button" tabindex="0" aria-label="Room 472 Instrument">
-        <div class="rh"><span class="num">472</span><span class="name">Instrument</span><span class="total" data-total></span></div>
+        <div class="rh"><span class="num">472</span><span class="name">Instrument</span><span class="total" data-total></span><button type="button" class="rbtn" data-edit-room="472" title="Edit this room" aria-label="Edit room 472"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>Edit</button></div>
         <div class="chips" data-chips></div>
       </div>
       <div class="room" id="room-474" data-lab="474-475" role="button" tabindex="0" aria-label="Room 474-475 Perm2">
-        <div class="rh"><span class="num">474–475</span><span class="name">Perm2</span><span class="total" data-total></span></div>
+        <div class="rh"><span class="num">474–475</span><span class="name">Perm2</span><span class="total" data-total></span><button type="button" class="rbtn" data-edit-room="474-475" title="Edit this room" aria-label="Edit room 474-475"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>Edit</button></div>
         <div class="chips" data-chips></div>
       </div>
       <div class="corridor h" aria-hidden="true"><span>Corridor</span></div>
       <div class="corridor v" aria-hidden="true"><span>Corridor</span></div>
       <div class="room" id="room-460" data-lab="460" role="button" tabindex="0" aria-label="Room 460 Sorption Lab">
-        <div class="rh"><span class="num">460</span><span class="name">Sorption Lab</span><span class="total" data-total></span></div>
+        <div class="rh"><span class="num">460</span><span class="name">Sorption Lab</span><span class="total" data-total></span><button type="button" class="rbtn" data-edit-room="460" title="Edit this room" aria-label="Edit room 460"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>Edit</button></div>
         <div class="chips" data-chips></div>
       </div>
       <div class="room" id="room-458" data-lab="458" role="button" tabindex="0" aria-label="Room 458 Perm1">
-        <div class="rh"><span class="num">458</span><span class="name">Perm1</span><span class="total" data-total></span></div>
+        <div class="rh"><span class="num">458</span><span class="name">Perm1</span><span class="total" data-total></span><button type="button" class="rbtn" data-edit-room="458" title="Edit this room" aria-label="Edit room 458"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>Edit</button></div>
         <div class="chips" data-chips></div>
       </div>
     </div>
@@ -416,6 +447,7 @@ dialog::backdrop{background:rgba(6,12,18,.55);backdrop-filter:blur(2px)}
     </div>
     <div class="foot">
       <span id="footNote">Data is saved in this browser. Use <b>Export</b> to share the current state and <b>Import</b> to load it elsewhere.</span>
+      <span><a href="inventory-template.txt" download id="templateLink">Download blank inventory template (.txt)</a></span>
       <span id="entryCount"></span>
     </div>
   </section>
@@ -484,6 +516,39 @@ dialog::backdrop{background:rgba(6,12,18,.55);backdrop-filter:blur(2px)}
   </form>
 </dialog>
 
+<dialog id="roomDlg" class="wide">
+  <form id="roomForm" method="dialog">
+    <div class="modal-h"><h3 id="roomTitle">Edit room</h3>
+      <button type="button" class="btn outline icon" id="roomClose" aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+    <div class="modal-b">
+      <div class="rrows-head"><span>Gas</span><span>Qty</span><span>Status</span><span>Note</span><span></span></div>
+      <div class="rrows" id="roomRows"></div>
+      <div><button type="button" class="btn outline" id="roomAddRow">+ Add line</button></div>
+    </div>
+    <div class="modal-f">
+      <span class="muted" id="roomHint" style="align-self:center"></span>
+      <div class="right">
+        <button type="button" class="btn outline" id="roomCancel">Cancel</button>
+        <button type="submit" class="btn primary">Save room</button>
+      </div>
+    </div>
+  </form>
+</dialog>
+<dialog id="reviewDlg">
+  <div class="modal-h"><h3 id="reviewTitle">Import inventory</h3>
+    <button type="button" class="btn outline icon" id="reviewClose" aria-label="Close">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+    </button>
+  </div>
+  <div class="modal-b review" id="reviewBody"></div>
+  <div class="modal-f"><div class="right">
+    <button type="button" class="btn outline" id="reviewCancel">Cancel</button>
+    <button type="button" class="btn primary" id="reviewApply">Replace board</button>
+  </div></div>
+</dialog>
 <dialog id="pinDlg">
   <form method="dialog" id="pinForm">
     <div class="modal-h"><h3>Lab PIN</h3></div>
@@ -792,22 +857,208 @@ function moveTip(e){
 }
 
 // export / import
+/* ---------- per-room editor ---------- */
+const roomDlg = document.getElementById('roomDlg');
+let roomLab = null;
+function gasOptions(selected){
+  return allGases().map(g=>`<option value="${g.id}" ${g.id===selected?'selected':''}>${g.label} — ${g.name}</option>`).join('') + '<option value="__new">+ Other gas…</option>';
+}
+function roomRow(e){
+  const d = document.createElement('div'); d.className = 'rrow'; if(e && e.id) d.dataset.id = e.id;
+  d.innerHTML = `
+    <select class="r-gas" aria-label="Gas">${gasOptions(e ? e.gas : 'N2')}</select>
+    <input class="r-qty" type="number" min="1" max="99" value="${e ? e.count : 1}" aria-label="Quantity">
+    <select class="r-status" aria-label="Status"><option value="new">New</option><option value="inuse">In use</option><option value="used">Used</option></select>
+    <input class="r-note" placeholder="Note (optional)" maxlength="80" value="${e ? escapeHtml(e.note||'') : ''}" aria-label="Note">
+    <button type="button" class="r-del" title="Remove line" aria-label="Remove line">×</button>
+    <input class="r-gasname" placeholder="New gas name, e.g. Kr" maxlength="24" aria-label="New gas name">`;
+  d.querySelector('.r-status').value = e ? e.status : 'new';
+  d.querySelector('.r-gas').addEventListener('change', ev => { d.classList.toggle('custom', ev.target.value==='__new'); if(ev.target.value==='__new') d.querySelector('.r-gasname').focus(); });
+  d.querySelector('.r-del').addEventListener('click', () => { d.remove(); roomEmptyHint(); });
+  return d;
+}
+function roomEmptyHint(){
+  const rows = document.getElementById('roomRows');
+  let hint = rows.querySelector('.rrows-empty');
+  if(!rows.querySelector('.rrow')){ if(!hint){ hint = document.createElement('div'); hint.className='rrows-empty'; hint.textContent='No cylinders in this room. Add a line or save to clear the room.'; rows.appendChild(hint); } }
+  else if(hint) hint.remove();
+}
+function openRoom(lab){
+  roomLab = lab;
+  document.getElementById('roomTitle').textContent = `Edit ${LABS[lab].num} · ${LABS[lab].name}`;
+  document.getElementById('roomHint').textContent = remote ? 'Saving updates the shared board for everyone.' : '';
+  const rows = document.getElementById('roomRows'); rows.innerHTML = '';
+  const order = allGases().map(g=>g.id);
+  state.entries.filter(e=>e.lab===lab).sort((a,b)=> (order.indexOf(a.gas)-order.indexOf(b.gas)) || a.status.localeCompare(b.status)).forEach(e => rows.appendChild(roomRow(e)));
+  roomEmptyHint();
+  roomDlg.showModal();
+}
+document.getElementById('roomAddRow').addEventListener('click', () => {
+  const rows = document.getElementById('roomRows'); const r = roomRow(null); rows.appendChild(r); roomEmptyHint(); r.querySelector('.r-gas').focus();
+});
+document.getElementById('roomForm').addEventListener('submit', ev => {
+  ev.preventDefault();
+  const newGases = [], out = [];
+  for(const r of document.querySelectorAll('#roomRows .rrow')){
+    let gas = r.querySelector('.r-gas').value;
+    if(gas==='__new'){
+      const name = r.querySelector('.r-gasname').value.trim();
+      if(!name){ r.querySelector('.r-gasname').focus(); toast('Enter a name for the new gas'); return; }
+      gas = resolveGas(name, newGases);
+    }
+    const count = Math.max(1, Math.min(99, parseInt(r.querySelector('.r-qty').value,10)||1));
+    const status = r.querySelector('.r-status').value;
+    const note = r.querySelector('.r-note').value.trim();
+    const same = out.find(x=>x.gas===gas && x.status===status && x.note===note);
+    if(same) same.count += count;
+    else out.push({ id: r.dataset.id || uid(), gas, count, status, lab: roomLab, note, updated: Date.now() });
+  }
+  state.entries = state.entries.filter(e=>e.lab!==roomLab).concat(out);
+  state.customGases = state.customGases.concat(newGases);
+  save(); render(); roomDlg.close();
+  toast(`${LABS[roomLab].num} saved · ${out.reduce((s,e)=>s+e.count,0)} cylinders`);
+});
+for(const id of ['roomCancel','roomClose']) document.getElementById(id).addEventListener('click', ()=>roomDlg.close());
+roomDlg.addEventListener('click', e => { if(e.target===roomDlg) roomDlg.close(); });
+document.getElementById('map').addEventListener('click', e => {
+  const b = e.target.closest('[data-edit-room]'); if(!b) return;
+  e.stopPropagation(); openRoom(b.dataset.editRoom);
+}, true);
+document.addEventListener('keydown', e => {
+  if(e.key==='a' && roomDlg.open) e.stopImmediatePropagation();
+}, true);
+
+/* ---------- text inventory format ---------- */
+const STATUS_WORDS = { new:'new', inuse:'in use', used:'used' };
+const LAB_ORDER = ['460','458','472','474-475'];
+function normStatus(t){
+  const k = t.toLowerCase().replace(/[\s_-]+/g,'');
+  if(['new','full','unused'].includes(k)) return 'new';
+  if(['inuse','using','connected','active'].includes(k)) return 'inuse';
+  if(['used','partial','opened','empty'].includes(k)) return 'used';
+  return null;
+}
+function normGasKey(t){ return t.toLowerCase().replace(/[₀-₉]/g, c => '₀₁₂₃₄₅₆₇₈₉'.indexOf(c)).replace(/[\s_-]+/g,''); }
+function resolveGas(text, newGases){
+  const key = normGasKey(text);
+  const all = allGases().concat(newGases);
+  const hit = all.find(g => normGasKey(g.id)===key || normGasKey(g.label)===key || normGasKey(g.name)===key);
+  if(hit) return hit.id;
+  const g = { id:'custom-'+uid(), label:text.trim(), name:text.trim(), color:EXTRA_COLORS[(state.customGases.length + newGases.length) % EXTRA_COLORS.length] };
+  newGases.push(g); return g.id;
+}
+function normLab(t){
+  const k = t.replace(/\s+/g,'').replace(/[–—]/g,'-');
+  if(LABS[k]) return k;
+  if(k==='474' || k==='475' || k==='474/475') return '474-475';
+  const num = k.match(/^\d{3}/); if(num && LABS[num[0]]) return num[0];
+  return null;
+}
+function exportText(){
+  const L = [];
+  L.push('# Koros Group Gas Cylinder Status - inventory file');
+  L.push('# Exported ' + new Date().toISOString().replace('T',' ').slice(0,16) + ' UTC');
+  L.push('#');
+  L.push('# Edit this file and Import it on the web page; the whole board is replaced by its contents.');
+  L.push('# Each room starts with [room]. Each line under it:  Gas | Qty | Status | Note');
+  L.push('#   Gas: N2 CO2 He CH4 O2 H2 Ar Air C3H6 C3H8 CO2/CH4 or any new name   Qty: 1-99   Status: new / in use / used');
+  L.push('# Lines starting with # are ignored.');
+  L.push('');
+  const order = allGases().map(g=>g.id);
+  for(const lab of LAB_ORDER){
+    L.push(`[${lab}]   # ${LABS[lab].name}`);
+    const rows = state.entries.filter(e=>e.lab===lab).sort((a,b)=> (order.indexOf(a.gas)-order.indexOf(b.gas)) || a.status.localeCompare(b.status));
+    for(const e of rows){
+      const g = gasById(e.gas);
+      const gasText = GASES.some(x=>x.id===e.gas) ? e.gas.replace('CO2CH4','CO2/CH4') : g.label;
+      L.push((`${gasText.padEnd(8)}| ${String(e.count).padStart(2)} | ${STATUS_WORDS[e.status].padEnd(6)}${e.note ? ' | ' + e.note : ''}`).trimEnd());
+    }
+    L.push('');
+  }
+  return L.join('\n');
+}
+function parseText(text){
+  const errors = [], warnings = [], entries = [], newGases = [];
+  let lab = null, lineNo = 0;
+  for(const raw of text.split(/\r?\n/)){
+    lineNo++;
+    const line = raw.replace(/#.*$/, '').trim();
+    if(!line) continue;
+    const head = line.match(/^\[(.+?)\]$/);
+    if(head){
+      lab = normLab(head[1]);
+      if(!lab) errors.push(`Line ${lineNo}: unknown room "[${head[1]}]" — use [460], [458], [472] or [474-475]`);
+      continue;
+    }
+    if(!lab){ errors.push(`Line ${lineNo}: "${line}" appears before any [room] header`); continue; }
+    const parts = line.split(/\s*(?:\||\t)\s*/);
+    if(parts.length < 3){ errors.push(`Line ${lineNo}: expected "Gas | Qty | Status | Note", got "${line}"`); continue; }
+    const [gasText, qtyText, statusText, ...noteParts] = parts;
+    const count = Number(qtyText);
+    if(!Number.isInteger(count) || count < 1 || count > 99){ errors.push(`Line ${lineNo}: quantity "${qtyText}" must be a whole number from 1 to 99`); continue; }
+    const status = normStatus(statusText);
+    if(!status){ errors.push(`Line ${lineNo}: status "${statusText}" must be new, in use or used`); continue; }
+    if(!gasText){ errors.push(`Line ${lineNo}: missing gas name`); continue; }
+    const gas = resolveGas(gasText, newGases);
+    const note = noteParts.join(' | ').trim();
+    const same = entries.find(e=>e.gas===gas && e.status===status && e.lab===lab && e.note===note);
+    if(same){ same.count += count; warnings.push(`Line ${lineNo}: merged into an earlier identical ${gasText} line in [${lab}]`); }
+    else entries.push({ id:uid(), gas, count, status, lab, note, updated:Date.now() });
+  }
+  for(const g of newGases) warnings.push(`New gas "${g.label}" will be added with its own color`);
+  return { entries, newGases, errors, warnings };
+}
+
 document.getElementById('exportBtn').addEventListener('click', () => {
-  const blob = new Blob([JSON.stringify({ ...state, exported:new Date().toISOString() }, null, 2)], { type:'application/json' });
+  const blob = new Blob([exportText()], { type:'text/plain;charset=utf-8' });
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-  a.download = `koros-gas-cylinders-${new Date().toISOString().slice(0,10)}.json`; a.click();
+  a.download = `koros-gas-cylinders-${new Date().toISOString().slice(0,10)}.txt`; a.click();
   setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
 });
 document.getElementById('importBtn').addEventListener('click', ()=>document.getElementById('importFile').click());
+
+const reviewDlg = document.getElementById('reviewDlg');
+let pendingImport = null;
+function openReview(result){
+  pendingImport = result;
+  const total = result.entries.reduce((s,e)=>s+e.count,0);
+  const rooms = new Set(result.entries.map(e=>e.lab)).size;
+  const ok = result.errors.length===0;
+  document.getElementById('reviewTitle').textContent = ok ? 'Import inventory' : 'Import has problems';
+  document.getElementById('reviewBody').innerHTML = `
+    <div class="sum"><div><b>${total}</b><span>cylinders</span></div><div><b>${result.entries.length}</b><span>lines</span></div><div><b>${rooms}</b><span>rooms</span></div></div>
+    ${result.errors.length ? `<ul class="err">${result.errors.map(x=>`<li>${escapeHtml(x)}</li>`).join('')}</ul>` : ''}
+    ${result.warnings.length ? `<ul class="warn">${result.warnings.map(x=>`<li>${escapeHtml(x)}</li>`).join('')}</ul>` : ''}
+    <p class="ok">${ok ? 'This replaces everything currently on the board' + (remote ? ' for the whole lab' : '') + '.' : 'Fix the lines above in the file and import it again. Nothing has been changed.'}</p>`;
+  document.getElementById('reviewApply').hidden = !ok;
+  reviewDlg.showModal();
+}
+document.getElementById('reviewApply').addEventListener('click', () => {
+  if(!pendingImport || pendingImport.errors.length) return;
+  state = { entries: pendingImport.entries, customGases: state.customGases.concat(pendingImport.newGases) };
+  document.getElementById('publishBanner').hidden = true;
+  save(); render(); reviewDlg.close(); pendingImport = null;
+  toast('Inventory imported');
+});
+for(const id of ['reviewCancel','reviewClose']) document.getElementById(id).addEventListener('click', ()=>{ pendingImport=null; reviewDlg.close(); });
+reviewDlg.addEventListener('click', e => { if(e.target===reviewDlg){ pendingImport=null; reviewDlg.close(); } });
+
 document.getElementById('importFile').addEventListener('change', async e => {
   const f = e.target.files[0]; if(!f) return;
-  try{
-    const s = JSON.parse(await f.text());
-    if(!s || !Array.isArray(s.entries)) throw new Error('bad');
-    state = { entries:s.entries.filter(x=>x && x.gas && x.lab && x.status && x.count>0), customGases:Array.isArray(s.customGases)?s.customGases:[] };
-    save(); render(); toast('Inventory imported');
-  }catch(err){ toast('That file is not a valid inventory export'); }
+  const text = await f.text();
   e.target.value = '';
+  if(text.trim().startsWith('{')){
+    try{
+      const j = JSON.parse(text);
+      if(!j || !Array.isArray(j.entries)) throw new Error('bad');
+      const entries = j.entries.filter(x=>x && x.gas && x.lab && x.status && x.count>0).map(x=>({ ...x, id:x.id||uid(), updated:x.updated||Date.now() }));
+      const known = new Set(allGases().map(g=>g.id));
+      const newGases = (Array.isArray(j.customGases)?j.customGases:[]).filter(g=>g && g.id && !known.has(g.id));
+      openReview({ entries, newGases, errors:[], warnings:[] });
+    }catch(err){ openReview({ entries:[], newGases:[], errors:['This JSON file is not a valid inventory export'], warnings:[] }); }
+    return;
+  }
+  openReview(parseText(text));
 });
 document.getElementById('sampleBtn').addEventListener('click', () => {
   const now = Date.now();

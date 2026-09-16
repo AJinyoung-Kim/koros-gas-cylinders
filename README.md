@@ -10,9 +10,33 @@ A single-page status board for the gas cylinders stored in the Koros Lab rooms
 - Header shows the total cylinder count and the New / In use / Used split.
 - Floor map shows every room with a pastel chip per gas (count, plus dots for the status mix). Rooms grow with their contents, so nothing is clipped when a room holds many cylinders. An "All rooms" panel sums each gas across the lab. Click a room to filter the list, hover a chip for the breakdown.
 - **Add** (top right) opens a form: gas, quantity, location, status, optional note. Entries update the map and totals immediately.
-- **Edit** on any row changes quantity, status, location or note, or deletes the entry.
+- **Edit** on a room card opens that room's list: change quantities, statuses and notes line by line, add or remove lines, then save the room in one go. **Edit** on an inventory row changes a single entry.
 - Gases not in the list can be added with "Other gas…"; they get their own color automatically.
+- **Export** downloads the inventory as a plain-text file; **Import** reads that file (or the blank `inventory-template.txt`) back after you edit it, shows a preview with any problems, and replaces the board on confirm.
 - Dark mode toggle, works on phones.
+
+## Inventory text file
+
+`inventory-template.txt` is a blank form; **Export** produces the same format filled in. Edit it in any text editor and **Import** it.
+
+```
+[460]   # Sorption Lab
+N2      | 3 | in use | sorption rigs
+He      | 2 | new
+CO2     | 1 | used   | half empty
+
+[458]   # Perm1
+CH4     | 1 | new
+```
+
+Rules:
+
+- A room starts with its number in brackets: `[460]`, `[458]`, `[472]`, `[474-475]`.
+- Each line under a room is `Gas | Qty | Status | Note` (a TAB also works as separator; the note is optional).
+- Gas: `N2 CO2 He CH4 O2 H2 Ar Air C3H6 C3H8 CO2/CH4`, or any other name, which is added as a new gas. `N₂`, `n2` and `Nitrogen` are all accepted.
+- Qty: whole number 1–99. Status: `new`, `in use`, `used` (`full`, `inuse`, `empty` and similar are understood).
+- `#` starts a comment; blank lines are ignored. The same gas with two statuses needs two lines.
+- The file is the whole inventory: importing replaces everything on the board. The preview lists every problem with its line number and nothing changes until you confirm.
 
 ## Where the data lives
 

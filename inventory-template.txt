@@ -1,0 +1,43 @@
+# ==============================================================
+#  Koros Group Gas Cylinder Status - inventory file
+# ==============================================================
+#
+#  HOW TO USE
+#   1. Fill in each room below: one line per gas and status.
+#   2. On the web page click "Import" and choose this file.
+#   3. Check the preview and confirm. The whole board is replaced
+#      by what is in this file, so list every cylinder you have.
+#
+#  RULES
+#   - A room starts with its number in square brackets:
+#       [460]   [458]   [472]   [474-475]
+#   - Every line under a room has the form
+#       Gas | Qty | Status | Note
+#     Gas     N2  CO2  He  CH4  O2  H2  Ar  Air  C3H6  C3H8  CO2/CH4
+#             (any other name, e.g. Kr or 10% CO2/N2, is added as a new gas)
+#     Qty     whole number from 1 to 99
+#     Status  new  /  in use  /  used
+#     Note    optional, free text (rack, instrument, grade ...)
+#   - The same gas with two different statuses needs two lines.
+#   - Lines starting with # are comments. Blank lines are ignored.
+#   - Spaces around the | are optional. A TAB also works as separator.
+#
+#  EXAMPLE (remove the # to activate a line)
+#   N2      | 3 | in use | sorption rigs
+#   He      | 2 | new
+#   CO2     | 1 | used   | half empty
+#   CO2/CH4 | 2 | new    | 50/50 mix
+#
+# --------------------------------------------------------------
+
+[460]   # Sorption Lab
+
+
+[458]   # Perm1
+
+
+[472]   # Instrument
+
+
+[474-475]   # Perm2
+
