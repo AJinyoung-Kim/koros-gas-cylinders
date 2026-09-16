@@ -14,7 +14,7 @@ A single-page status board for the gas cylinders stored in the Koros Lab rooms
 - The inventory list is grouped by gas, one line per room, so you can see at a glance where each gas is and in what state.
 - Gases not in the list can be added with "Other gas…"; they get their own color automatically.
 - **Export** downloads the inventory as a plain-text file; **Import** reads that file (or the blank `inventory-template.txt`) back after you edit it, shows a preview with any problems, and replaces the board on confirm.
-- **Request** (bottom-right of the floor map) records a cylinder request: gas, quantity, who asked, optional note. Open requests are shared with everyone; **Done** removes one once the cylinders arrive.
+- **Request** (bottom-right of the floor map) records a cylinder request: gas, quantity, who asked, optional note. Requests are shared with everyone. **Done** marks it as ordered (the button becomes *Waiting for delivery*); pressing that when the cylinders arrive opens the Add dialog pre-filled with the gas and quantity, so choosing the room puts them straight into the inventory and closes the request. × removes a request.
 - Editing (Add, Edit, Request, Import) asks for the lab PIN once per browser tab.
 - Dark mode toggle, works on phones.
 

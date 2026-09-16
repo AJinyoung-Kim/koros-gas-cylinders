@@ -237,6 +237,12 @@ dialog.wide{width:min(760px,calc(100vw - 32px))}
 .rq .when{font-size:11.5px;color:var(--text-3)}
 .rq .done{border:1px solid var(--border-strong);background:var(--surface);border-radius:8px;padding:5px 9px;font-size:12px;font-weight:700;color:var(--text-2);white-space:nowrap}
 .rq .done:hover{background:var(--status-new-bg);color:var(--status-new);border-color:var(--status-new)}
+.rq .done.waiting{background:var(--status-used-bg);color:var(--status-used);border-color:var(--status-used)}
+.rq .done.waiting:hover{background:var(--status-new-bg);color:var(--status-new);border-color:var(--status-new)}
+.rq .acts{display:inline-flex;gap:6px;align-items:center}
+.rq .rx{width:28px;height:28px;border:1px solid transparent;background:transparent;border-radius:8px;color:var(--text-3);font-size:16px;line-height:1}
+.rq .rx:hover{color:var(--danger);border-color:var(--danger)}
+.rq .stage{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--status-used)}
 .rq .rnote{grid-column:1 / -1;font-size:12px;color:var(--text-3)}
 .rq .chip{padding:4px 8px 4px 5px}
 .requests .empty{font-size:12.5px;color:var(--text-3);font-style:italic}
@@ -437,7 +443,7 @@ dialog::backdrop{background:rgba(6,12,18,.55);backdrop-filter:blur(2px)}
   </div>
   <section class="card">
     <div class="card-head">
-      <h2>Floor map</h2>
+      <h2>Floor map <span class="hint" id="mapUpdated" style="font-weight:500;margin-left:6px"></span></h2>
       <span class="hint">Click a room to filter the list · hover a chip for the New / In use / Used breakdown</span>
     </div>
     <div class="map" id="map">
@@ -748,8 +754,9 @@ function render(){
   document.getElementById('stNew').textContent = t.new;
   document.getElementById('stUsed').textContent = t.used;
 
-  const last = state.entries.reduce((m,e)=> e.updated>m ? e.updated : m, 0);
+  const last = Math.max(state.entries.reduce((m,e)=> Math.max(m, e.updated||0), 0), (state.requests||[]).reduce((m,r)=> Math.max(m, r.created||0, r.orderedAt||0), 0));
   document.getElementById('lastUpdated').textContent = last ? 'Last updated ' + fmtDate(last) : 'No records yet';
+  document.getElementById('mapUpdated').textContent = last ? 'Last updated ' + fmtDate(last) : '';
 
   // map: each room lists chips per gas within New / In use / Used rows
   const order = allGases().map(g=>g.id);
@@ -788,8 +795,11 @@ function render(){
         const g = gasById(r.gas);
         return `<div class="rq" data-req="${r.id}">
           <span class="chip">${cylSVG(g.color)}<span>${g.label}</span><span class="cnt">${r.count}</span></span>
-          <span class="who"><b>${escapeHtml(r.name)}</b> <span class="when">· ${fmtDate(r.created)}</span></span>
-          <button type="button" class="done" data-done="${r.id}" title="Mark as received and remove">Done</button>
+          <span class="who"><b>${escapeHtml(r.name)}</b> <span class="when">· ${fmtDate(r.created)}</span>${r.stage==='waiting' ? ` <span class="stage">· ordered ${fmtDate(r.orderedAt || r.created)}</span>` : ''}</span>
+          <span class="acts">${r.stage==='waiting'
+            ? `<button type="button" class="done waiting" data-deliver="${r.id}" title="Cylinders arrived: add them to a room">Waiting for delivery</button>`
+            : `<button type="button" class="done" data-done="${r.id}" title="Request handled / ordered">Done</button>`}
+            <button type="button" class="rx" data-remove="${r.id}" title="Remove request" aria-label="Remove request">×</button></span>
           ${r.note ? `<span class="rnote">${escapeHtml(r.note)}</span>` : ''}
         </div>`;
       }).join('') : '<div class="empty">No open requests. Use Request to ask for new cylinders.</div>');
@@ -857,15 +867,21 @@ function onGasChange(){
 }
 fGas.addEventListener('change', onGasChange);
 
-function openAdd(prefLab){
-  editingId = null;
-  document.getElementById('dlgTitle').textContent = 'Add cylinders';
-  document.getElementById('saveBtn').textContent = 'Add';
+let deliverRequest = null;   // request being received through the Add dialog
+function openAdd(prefLab, fromRequest){
+  editingId = null; deliverRequest = fromRequest || null;
+  document.getElementById('dlgTitle').textContent = fromRequest ? `Receive delivery · ${gasById(fromRequest.gas).label} × ${fromRequest.count}` : 'Add cylinders';
+  document.getElementById('saveBtn').textContent = fromRequest ? 'Add to room' : 'Add';
   document.getElementById('deleteBtn').hidden = true;
-  fillGasSelect(); fGasName.value=''; fCount.value = 1; fLab.value = prefLab || '460'; fNote.value='';
+  fillGasSelect(fromRequest ? fromRequest.gas : undefined); fGasName.value='';
+  fCount.value = fromRequest ? fromRequest.count : 1;
+  fLab.value = prefLab || '460';
+  fNote.value = fromRequest ? (fromRequest.note || '') : '';
   document.getElementById('sNew').checked = true;
   dlg.showModal();
+  if(fromRequest) setTimeout(()=>fLab.focus(), 0);
 }
+dlg.addEventListener('close', () => { deliverRequest = null; });
 function openEdit(id){
   const e = state.entries.find(x=>x.id===id); if(!e) return;
   editingId = id;
@@ -900,7 +916,11 @@ document.getElementById('form').addEventListener('submit', ev => {
     const same = state.entries.find(x=>x.gas===gasId && x.status===status && x.lab===entry.lab && (x.note||'')===entry.note);
     if(same){ same.count += count; same.updated = Date.now(); }
     else state.entries.push({ id:uid(), ...entry });
-    toast(`Added ${count} × ${gasById(gasId).label} to ${LABS[entry.lab].num}`);
+    if(deliverRequest){
+      state.requests = (state.requests || []).filter(x=>x.id!==deliverRequest.id);
+      toast(`Delivered: ${count} × ${gasById(gasId).label} added to ${LABS[entry.lab].num}, request from ${deliverRequest.name} closed`);
+      deliverRequest = null;
+    }else toast(`Added ${count} × ${gasById(gasId).label} to ${LABS[entry.lab].num}`);
   }
   save(); render(); dlg.close();
 });
@@ -1000,11 +1020,20 @@ document.getElementById('reqForm').addEventListener('submit', ev => {
 for(const id of ['reqCancel','reqClose']) document.getElementById(id).addEventListener('click', ()=>reqDlg.close());
 reqDlg.addEventListener('click', e => { if(e.target===reqDlg) reqDlg.close(); });
 document.getElementById('reqList').addEventListener('click', e => {
-  const b = e.target.closest('[data-done]'); if(!b) return;
-  requirePin(() => {
-    const r = (state.requests || []).find(x=>x.id===b.dataset.done); if(!r) return;
+  const done = e.target.closest('[data-done]'), deliver = e.target.closest('[data-deliver]'), remove = e.target.closest('[data-remove]');
+  if(done) requirePin(() => {
+    const r = (state.requests || []).find(x=>x.id===done.dataset.done); if(!r) return;
+    r.stage = 'waiting'; r.orderedAt = Date.now();
+    save(); render(); toast(`${gasById(r.gas).label} × ${r.count} marked as ordered — waiting for delivery`);
+  });
+  else if(deliver) requirePin(() => {
+    const r = (state.requests || []).find(x=>x.id===deliver.dataset.deliver); if(!r) return;
+    openAdd(filterLab, r);
+  });
+  else if(remove) requirePin(() => {
+    const r = (state.requests || []).find(x=>x.id===remove.dataset.remove); if(!r) return;
     state.requests = state.requests.filter(x=>x.id!==r.id);
-    save(); render(); toast(`Request from ${r.name} marked done`);
+    save(); render(); toast(`Request from ${r.name} removed`);
   });
 });
 
