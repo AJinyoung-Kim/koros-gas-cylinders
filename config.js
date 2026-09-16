@@ -1,19 +1,16 @@
 // Koros Lab gas cylinder board — shared database settings.
 //
-// Leave `firebase: null` to run in local-only mode (each browser keeps its own data).
-// To share one live inventory with the whole lab, paste the web-app config from the
-// Firebase console (Project settings → Your apps → SDK setup and configuration → Config).
+// Set `firebase: null` to run in local-only mode (each browser keeps its own data).
 // These values are public identifiers, not secrets; write access is controlled by the
 // database rules in firebase.rules.json plus the lab PIN stored at /secret/pin.
 window.KOROS_CONFIG = {
-  firebase: null,
-  // firebase: {
-  //   apiKey: "...",
-  //   authDomain: "your-project.firebaseapp.com",
-  //   databaseURL: "https://your-project-default-rtdb.firebaseio.com",
-  //   projectId: "your-project",
-  //   storageBucket: "your-project.appspot.com",
-  //   messagingSenderId: "...",
-  //   appId: "..."
-  // },
+  firebase: {
+    apiKey: "AIzaSyAcAAIlTzecejdhSu9Nt6G-EX0_m7x8ClI",
+    authDomain: "koros-gas-1f336.firebaseapp.com",
+    databaseURL: "https://koros-gas-1f336-default-rtdb.firebaseio.com",
+    projectId: "koros-gas-1f336",
+    storageBucket: "koros-gas-1f336.firebasestorage.app",
+    messagingSenderId: "289047254277",
+    appId: "1:289047254277:web:8f35c1c9064794dabcd36c"
+  },
 };
