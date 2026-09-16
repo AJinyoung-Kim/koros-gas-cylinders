@@ -40,6 +40,6 @@ If a shared, always-in-sync inventory is needed later, the data model is a plain
 ## Development
 
 It is one file: `index.html`. Open it in a browser, or serve it with any static server.
-Deployed with GitHub Pages via `.github/workflows/pages.yml`.
+Deployed with GitHub Pages directly from the `main` branch.
 
 `reference/lab-status.png` is the original room sketch the floor map is based on.
