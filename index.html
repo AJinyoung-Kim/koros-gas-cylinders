@@ -8,6 +8,7 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='9' y='6' width='14' height='24' rx='4' fill='%232a78d6'/%3E%3Crect x='13' y='2' width='6' height='5' rx='1.5' fill='%231b4f8a'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="config.js"></script>
 <style>
 :root{
   color-scheme:light;
@@ -269,6 +270,14 @@ dialog::backdrop{background:rgba(6,12,18,.55);backdrop-filter:blur(2px)}
 }
 .toast.show{opacity:1;transform:translate(-50%,0)}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:3px 10px 3px 8px;font-size:12px;font-weight:600;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);color:#fff;cursor:pointer;vertical-align:middle}
+.pill i{width:7px;height:7px;border-radius:50%;background:#9aa4ad}
+.pill.live i{background:#4ade80;box-shadow:0 0 0 3px rgba(74,222,128,.25)}
+.pill.offline i{background:#f87171}
+.pill.connecting i{background:#fbbf24}
+.banner{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:var(--status-inuse-bg);border:1px solid var(--accent);color:var(--text);border-radius:12px;padding:12px 14px;margin-bottom:18px;font-size:14px}
+.banner .btn{background:var(--brand);color:#fff}
+.pin-help{font-size:13px;color:var(--text-2);margin:0}
 </style>
 </head>
 <body>
@@ -278,7 +287,7 @@ dialog::backdrop{background:rgba(6,12,18,.55);backdrop-filter:blur(2px)}
     <div class="top-row">
       <div class="title-block">
         <h1>Koros Lab Gas Cylinders Status</h1>
-        <p class="sub">Rooms 458 · 460 · 472 · 474–475 &nbsp;·&nbsp; <span id="lastUpdated">No records yet</span></p>
+        <p class="sub">Rooms 458 · 460 · 472 · 474–475 &nbsp;·&nbsp; <span id="lastUpdated">No records yet</span> &nbsp;·&nbsp; <button class="pill" id="syncPill" title="Sync status"><i></i><span>Local only</span></button></p>
       </div>
       <div class="top-actions">
         <button class="btn ghost icon" id="themeBtn" title="Toggle dark mode" aria-label="Toggle dark mode">
@@ -310,6 +319,10 @@ dialog::backdrop{background:rgba(6,12,18,.55);backdrop-filter:blur(2px)}
 </header>
 
 <main class="wrap">
+  <div class="banner" id="publishBanner" hidden>
+    <span>The shared board is empty but this browser has saved cylinders. Publish them so the whole lab sees the same inventory?</span>
+    <span style="display:flex;gap:8px"><button class="btn outline" id="discardLocal">Discard local</button><button class="btn" id="publishLocal">Publish local data</button></span>
+  </div>
   <section class="card">
     <div class="card-head">
       <h2>Floor map</h2>
@@ -372,7 +385,7 @@ dialog::backdrop{background:rgba(6,12,18,.55);backdrop-filter:blur(2px)}
       <button class="btn outline" id="sampleBtn">Load sample data</button>
     </div>
     <div class="foot">
-      <span>Data is saved in this browser. Use <b>Export</b> to share the current state and <b>Import</b> to load it elsewhere.</span>
+      <span id="footNote">Data is saved in this browser. Use <b>Export</b> to share the current state and <b>Import</b> to load it elsewhere.</span>
       <span id="entryCount"></span>
     </div>
   </section>
@@ -441,6 +454,25 @@ dialog::backdrop{background:rgba(6,12,18,.55);backdrop-filter:blur(2px)}
   </form>
 </dialog>
 
+<dialog id="pinDlg">
+  <form method="dialog" id="pinForm">
+    <div class="modal-h"><h3>Lab PIN</h3></div>
+    <div class="modal-b">
+      <p class="pin-help" id="pinHelp">Changes are shared with everyone in the lab. Enter the lab PIN once to enable editing from this browser.</p>
+      <div class="field">
+        <label for="fPin">PIN</label>
+        <input id="fPin" type="password" autocomplete="off" inputmode="numeric" required>
+      </div>
+    </div>
+    <div class="modal-f">
+      <button type="button" class="btn danger" id="forgetPin" hidden>Forget PIN</button>
+      <div class="right">
+        <button type="button" class="btn outline" id="pinCancel">Cancel</button>
+        <button type="submit" class="btn primary" style="background:var(--brand);color:#fff">Continue</button>
+      </div>
+    </div>
+  </form>
+</dialog>
 <div class="tip" id="tip" role="tooltip"></div>
 <div class="toast" id="toast"></div>
 
@@ -486,9 +518,11 @@ function load(){
   }catch(e){}
   return { entries:[], customGases:[] };
 }
-function save(){
+function saveLocal(){
   try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }catch(e){ toast('Could not save to this browser'); }
 }
+// persist = save locally, then push to the shared board when one is configured
+function save(){ saveLocal(); if(remote) pushRemote(); }
 function allGases(){ return GASES.concat(state.customGases); }
 function gasById(id){ return allGases().find(g => g.id===id) || { id, label:id, name:id, color:'#6b7280' }; }
 function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
@@ -769,7 +803,95 @@ document.addEventListener('keydown', e => {
   if(e.key==='a' && !dlg.open && !/input|select|textarea/i.test(document.activeElement.tagName)) openAdd(filterLab);
 });
 
+/* ---------- shared board (Firebase Realtime Database) ---------- */
+const PIN_KEY = 'koros-gas-pin';
+let remote = null;           // { db, ref, set }
+let remoteReady = false;     // first snapshot received
+let pendingPush = false;
+const pill = document.getElementById('syncPill');
+function setSync(mode, label){
+  pill.className = 'pill ' + mode;
+  pill.querySelector('span').textContent = label;
+  document.getElementById('footNote').innerHTML = mode==='local'
+    ? 'Data is saved in this browser. Use <b>Export</b> to share the current state and <b>Import</b> to load it elsewhere.'
+    : 'Shared board: every change is saved to the lab database and appears for everyone within a second. Editing needs the lab PIN once per browser.';
+}
+function getPin(){ try{ return localStorage.getItem(PIN_KEY) || ''; }catch(e){ return ''; } }
+function setPin(v){ try{ v ? localStorage.setItem(PIN_KEY, v) : localStorage.removeItem(PIN_KEY); }catch(e){} }
+function toArray(v){ if(!v) return []; return Array.isArray(v) ? v.filter(Boolean) : Object.values(v); }
+
+const pinDlg = document.getElementById('pinDlg');
+function openPin(msg){
+  document.getElementById('pinHelp').textContent = msg || 'Changes are shared with everyone in the lab. Enter the lab PIN once to enable editing from this browser.';
+  document.getElementById('forgetPin').hidden = !getPin();
+  document.getElementById('fPin').value = '';
+  if(!pinDlg.open) pinDlg.showModal();
+}
+document.getElementById('pinForm').addEventListener('submit', e => {
+  e.preventDefault();
+  setPin(document.getElementById('fPin').value.trim());
+  pinDlg.close();
+  if(pendingPush){ pendingPush=false; pushRemote(); }
+});
+document.getElementById('pinCancel').addEventListener('click', ()=>{ pendingPush=false; pinDlg.close(); });
+document.getElementById('forgetPin').addEventListener('click', ()=>{ setPin(''); pinDlg.close(); toast('PIN removed from this browser'); });
+pill.addEventListener('click', ()=>{ if(remote) openPin('Enter a new lab PIN for this browser, or forget the stored one.'); else toast('Shared board not configured — see README'); });
+
+async function pushRemote(){
+  if(!remote) return;
+  const pin = getPin();
+  if(!pin){ pendingPush = true; openPin(); return; }
+  try{
+    await remote.set(remote.ref(remote.db, 'board'), {
+      entries: state.entries, customGases: state.customGases,
+      meta: { pin, updatedAt: Date.now() }
+    });
+  }catch(err){
+    const msg = String(err && (err.code || err.message) || err);
+    if(/permission/i.test(msg)){ setPin(''); pendingPush = true; openPin('That PIN was not accepted. Ask the lab for the current PIN and try again.'); }
+    else toast('Sync failed: ' + msg);
+  }
+}
+
+async function initRemote(){
+  const cfg = window.KOROS_CONFIG && window.KOROS_CONFIG.firebase;
+  if(!cfg || !cfg.databaseURL){ setSync('local','Local only'); return; }
+  setSync('connecting','Connecting…');
+  try{
+    const V = '11.10.0';
+    const [{ initializeApp }, { getDatabase, ref, set, onValue }] = await Promise.all([
+      import(`https://www.gstatic.com/firebasejs/${V}/firebase-app.js`),
+      import(`https://www.gstatic.com/firebasejs/${V}/firebase-database.js`),
+    ]);
+    const db = getDatabase(initializeApp(cfg));
+    remote = { db, ref, set };
+    let gotEntries = false;
+    onValue(ref(db, 'board/entries'), snap => {
+      const incoming = toArray(snap.val());
+      if(!gotEntries){
+        gotEntries = true; remoteReady = true;
+        if(!incoming.length && state.entries.length){
+          // shared board empty, local has data: ask before overwriting either side
+          document.getElementById('publishBanner').hidden = false; return;
+        }
+      }
+      if(document.getElementById('publishBanner').hidden){ state.entries = incoming; saveLocal(); render(); }
+    });
+    onValue(ref(db, 'board/customGases'), snap => {
+      const incoming = toArray(snap.val());
+      if(document.getElementById('publishBanner').hidden){ state.customGases = incoming; saveLocal(); render(); }
+    });
+    onValue(ref(db, '.info/connected'), snap => setSync(snap.val() ? 'live' : 'offline', snap.val() ? 'Live · shared board' : 'Offline · reconnecting'));
+  }catch(err){
+    remote = null; setSync('offline','Shared board unavailable');
+    toast('Could not reach the shared database — working locally');
+  }
+}
+document.getElementById('publishLocal').addEventListener('click', ()=>{ document.getElementById('publishBanner').hidden = true; pushRemote(); });
+document.getElementById('discardLocal').addEventListener('click', ()=>{ document.getElementById('publishBanner').hidden = true; state = { entries:[], customGases:[] }; saveLocal(); render(); });
+
 render();
+initRemote();
 })();
 </script>
 </body>
