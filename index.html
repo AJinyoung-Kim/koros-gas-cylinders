@@ -808,7 +808,8 @@ const PIN_KEY = 'koros-gas-pin';
 let remote = null;           // { db, ref, set }
 let remoteReady = false;     // first snapshot received
 let pendingPush = false;
-let lastRemote = null;    // last snapshot from the shared board
+let lastRemote = null;    // deep copy of the last snapshot from the shared board
+const clone = v => JSON.parse(JSON.stringify(v));
 const pill = document.getElementById('syncPill');
 function setSync(mode, label){
   pill.className = 'pill ' + mode;
@@ -837,7 +838,7 @@ document.getElementById('pinForm').addEventListener('submit', e => {
 document.getElementById('pinCancel').addEventListener('click', ()=>{
   pinDlg.close();
   if(pendingPush && lastRemote){ // drop the unsaved local change and show the shared state again
-    state = { entries: lastRemote.entries.slice(), customGases: lastRemote.customGases.slice() };
+    state = clone(lastRemote);
     saveLocal(); render(); toast('Change discarded — the lab PIN is needed to edit the shared board');
   }
   pendingPush = false;
@@ -883,12 +884,12 @@ async function initRemote(){
           document.getElementById('publishBanner').hidden = false; return;
         }
       }
-      lastRemote = { entries: incoming, customGases: (lastRemote ? lastRemote.customGases : state.customGases) };
+      lastRemote = { entries: clone(incoming), customGases: clone(lastRemote ? lastRemote.customGases : state.customGases) };
       if(document.getElementById('publishBanner').hidden){ state.entries = incoming; saveLocal(); render(); }
     });
     onValue(ref(db, 'board/customGases'), snap => {
       const incoming = toArray(snap.val());
-      lastRemote = { entries: (lastRemote ? lastRemote.entries : state.entries), customGases: incoming };
+      lastRemote = { entries: clone(lastRemote ? lastRemote.entries : state.entries), customGases: clone(incoming) };
       if(document.getElementById('publishBanner').hidden){ state.customGases = incoming; saveLocal(); render(); }
     });
     onValue(ref(db, '.info/connected'), snap => setSync(snap.val() ? 'live' : 'offline', snap.val() ? 'Live · shared board' : 'Offline · reconnecting'));
