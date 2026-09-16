@@ -808,6 +808,7 @@ const PIN_KEY = 'koros-gas-pin';
 let remote = null;           // { db, ref, set }
 let remoteReady = false;     // first snapshot received
 let pendingPush = false;
+let lastRemote = null;    // last snapshot from the shared board
 const pill = document.getElementById('syncPill');
 function setSync(mode, label){
   pill.className = 'pill ' + mode;
@@ -833,7 +834,14 @@ document.getElementById('pinForm').addEventListener('submit', e => {
   pinDlg.close();
   if(pendingPush){ pendingPush=false; pushRemote(); }
 });
-document.getElementById('pinCancel').addEventListener('click', ()=>{ pendingPush=false; pinDlg.close(); });
+document.getElementById('pinCancel').addEventListener('click', ()=>{
+  pinDlg.close();
+  if(pendingPush && lastRemote){ // drop the unsaved local change and show the shared state again
+    state = { entries: lastRemote.entries.slice(), customGases: lastRemote.customGases.slice() };
+    saveLocal(); render(); toast('Change discarded — the lab PIN is needed to edit the shared board');
+  }
+  pendingPush = false;
+});
 document.getElementById('forgetPin').addEventListener('click', ()=>{ setPin(''); pinDlg.close(); toast('PIN removed from this browser'); });
 pill.addEventListener('click', ()=>{ if(remote) openPin('Enter a new lab PIN for this browser, or forget the stored one.'); else toast('Shared board not configured — see README'); });
 
@@ -875,10 +883,12 @@ async function initRemote(){
           document.getElementById('publishBanner').hidden = false; return;
         }
       }
+      lastRemote = { entries: incoming, customGases: (lastRemote ? lastRemote.customGases : state.customGases) };
       if(document.getElementById('publishBanner').hidden){ state.entries = incoming; saveLocal(); render(); }
     });
     onValue(ref(db, 'board/customGases'), snap => {
       const incoming = toArray(snap.val());
+      lastRemote = { entries: (lastRemote ? lastRemote.entries : state.entries), customGases: incoming };
       if(document.getElementById('publishBanner').hidden){ state.customGases = incoming; saveLocal(); render(); }
     });
     onValue(ref(db, '.info/connected'), snap => setSync(snap.val() ? 'live' : 'offline', snap.val() ? 'Live · shared board' : 'Offline · reconnecting'));
