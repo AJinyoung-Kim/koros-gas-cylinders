@@ -846,22 +846,25 @@ document.getElementById('pinCancel').addEventListener('click', ()=>{
 document.getElementById('forgetPin').addEventListener('click', ()=>{ setPin(''); pinDlg.close(); toast('PIN removed from this browser'); });
 pill.addEventListener('click', ()=>{ if(remote) openPin('Enter a new lab PIN for this browser, or forget the stored one.'); else toast('Shared board not configured — see README'); });
 
+let acceptedPin = null;   // the PIN representation (string or number) the database last accepted
 async function pushRemote(){
   if(!remote) return;
   const pin = getPin();
   if(!pin){ pendingPush = true; openPin(); return; }
+  // Capture the payload now: a rejected attempt makes the SDK revert local state to the server copy.
+  const payload = { entries: clone(state.entries), customGases: clone(state.customGases) };
   // The console may store the PIN as a string or a number; the rule compares type too, so try both.
-  const candidates = /^\d+$/.test(pin) ? [pin, Number(pin)] : [pin];
+  let candidates = /^\d+$/.test(pin) ? [pin, Number(pin)] : [pin];
+  if(acceptedPin !== null && candidates.some(c => c === acceptedPin)) candidates = [acceptedPin];
   let lastErr = null;
   for(const p of candidates){
     try{
-      await remote.set(remote.ref(remote.db, 'board'), {
-        entries: state.entries, customGases: state.customGases,
-        meta: { pin: p, updatedAt: Date.now() }
-      });
+      await remote.set(remote.ref(remote.db, 'board'), { ...payload, meta: { pin: p, updatedAt: Date.now() } });
+      acceptedPin = p;
       return;
     }catch(err){ lastErr = err; if(!/permission/i.test(String(err && (err.code || err.message) || err))) break; }
   }
+  acceptedPin = null;
   const msg = String(lastErr && (lastErr.code || lastErr.message) || lastErr);
   if(/permission/i.test(msg)){ setPin(''); pendingPush = true; openPin('That PIN was not accepted. Ask the lab for the current PIN and try again.'); }
   else toast('Sync failed: ' + msg);
