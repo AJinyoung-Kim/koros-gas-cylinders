@@ -30,7 +30,7 @@ The header pill shows which mode is active (Local only / Live · shared board / 
 1. Go to https://console.firebase.google.com and **Add project** (any name, e.g. `koros-gas`). Google Analytics can be turned off.
 2. In the project: **Build → Realtime Database → Create database**. Pick the nearest location and start in *locked mode*.
 3. Open the **Rules** tab, replace everything with the contents of `firebase.rules.json`, and **Publish**.
-4. Open the **Data** tab and add a child `secret` with a child `pin` whose value is the lab PIN (a string, e.g. `"2468"`). This is the PIN lab members type once per browser before they can edit. Only the console can read or change it.
+4. Open the **Data** tab and add a child `secret` with a child `pin` whose value is the lab PIN (e.g. `1111`; number or string both work). This is the PIN lab members type once per browser before they can edit. Only the console can read or change it.
 5. **Project settings (gear) → Your apps → Web (</>)**, register the app, and copy the `firebaseConfig` object.
 6. Paste it into `config.js` as `window.KOROS_CONFIG = { firebase: { ... } }` and push. The next page load is live.
 

@@ -850,16 +850,21 @@ async function pushRemote(){
   if(!remote) return;
   const pin = getPin();
   if(!pin){ pendingPush = true; openPin(); return; }
-  try{
-    await remote.set(remote.ref(remote.db, 'board'), {
-      entries: state.entries, customGases: state.customGases,
-      meta: { pin, updatedAt: Date.now() }
-    });
-  }catch(err){
-    const msg = String(err && (err.code || err.message) || err);
-    if(/permission/i.test(msg)){ setPin(''); pendingPush = true; openPin('That PIN was not accepted. Ask the lab for the current PIN and try again.'); }
-    else toast('Sync failed: ' + msg);
+  // The console may store the PIN as a string or a number; the rule compares type too, so try both.
+  const candidates = /^\d+$/.test(pin) ? [pin, Number(pin)] : [pin];
+  let lastErr = null;
+  for(const p of candidates){
+    try{
+      await remote.set(remote.ref(remote.db, 'board'), {
+        entries: state.entries, customGases: state.customGases,
+        meta: { pin: p, updatedAt: Date.now() }
+      });
+      return;
+    }catch(err){ lastErr = err; if(!/permission/i.test(String(err && (err.code || err.message) || err))) break; }
   }
+  const msg = String(lastErr && (lastErr.code || lastErr.message) || lastErr);
+  if(/permission/i.test(msg)){ setPin(''); pendingPush = true; openPin('That PIN was not accepted. Ask the lab for the current PIN and try again.'); }
+  else toast('Sync failed: ' + msg);
 }
 
 async function initRemote(){
