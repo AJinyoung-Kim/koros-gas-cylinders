@@ -8,7 +8,7 @@ A single-page status board for the gas cylinders stored in the Koros Lab rooms
 ## What it does
 
 - Header shows the total cylinder count and the New / In use / Used split.
-- Floor map shows every room with a pastel chip per gas, grouped into New / In use / Used rows; new cylinders carry a small neon NEW tag. Rooms grow with their contents, so nothing is clipped when a room holds many cylinders. An "All rooms" panel sums each gas across the lab. Click a room to filter the list, hover a chip for the breakdown.
+- Floor map shows every room with a pastel chip per gas, grouped into New / In use / Used rows; new cylinders glow softly in neon lime. Rooms grow with their contents, so nothing is clipped when a room holds many cylinders. An "All rooms" panel sums each gas across the lab. Click a room to filter the list, hover a chip for the breakdown.
 - **Add** (top right) opens a form: gas, quantity, location, status, optional note. Entries update the map and totals immediately.
 - **Edit** on a room card (or on a room line in the inventory) opens that room's list: change quantities, statuses and notes line by line, add or remove lines, then save the room in one go.
 - The inventory list is grouped by gas, one line per room, so you can see at a glance where each gas is and in what state.

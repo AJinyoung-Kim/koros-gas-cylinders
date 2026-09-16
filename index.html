@@ -45,7 +45,7 @@
   --status-inuse-bg:#e4edfa;
   --status-used-bg:#f9ebdf;
   --chip-new:#fff3c4; --chip-new-border:#ecd77e; --chip-new-ink:#7a9a00;
-  --neon-bg:#eaffb3; --neon-ink:#3f7d00; --neon-border:#b6ef5f; --neon-glow:rgba(150,255,60,.75);
+  --neon-bg:#f6ffe6; --neon-ink:#3f7d00; --neon-border:#a9e85a; --neon-glow:rgba(140,240,70,.55);
   --chip-inuse:#e3eefc; --chip-inuse-border:#b7cff2;
   --chip-used:#ece8e1; --chip-used-border:#d3cbbe; --chip-used-ink:#8a7a6a;
   --shadow:0 1px 2px rgba(43,47,58,.05),0 10px 28px -14px rgba(43,47,58,.16);
@@ -64,7 +64,7 @@
     --corridor:#1b1f26; --corridor-line:#3a414c;
     --status-new:#6cc79a; --status-inuse:#8db4e6; --status-used:#dba579;
     --status-new-bg:#1d3a2c; --status-inuse-bg:#1f2f47; --status-used-bg:#3d2c1e;
-    --chip-new:#4a3f12; --chip-new-border:#7d6a1e; --chip-new-ink:#e8cf6a; --chip-inuse:#1f2f47; --chip-inuse-border:#3a5a8a; --chip-used:#35312c; --chip-used-border:#5a534a; --chip-used-ink:#bdb0a0; --neon-bg:#2c4a12; --neon-ink:#c9ff7a; --neon-border:#5f9a2a; --neon-glow:rgba(150,255,60,.55);
+    --chip-new:#4a3f12; --chip-new-border:#7d6a1e; --chip-new-ink:#e8cf6a; --chip-inuse:#1f2f47; --chip-inuse-border:#3a5a8a; --chip-used:#35312c; --chip-used-border:#5a534a; --chip-used-ink:#bdb0a0; --neon-bg:#243a14; --neon-ink:#c9ff7a; --neon-border:#6fae35; --neon-glow:rgba(150,255,60,.45);
     --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 28px -14px rgba(0,0,0,.6);
   }
 }
@@ -80,7 +80,7 @@
   --corridor:#1b1f26; --corridor-line:#3a414c;
   --status-new:#6cc79a; --status-inuse:#8db4e6; --status-used:#dba579;
   --status-new-bg:#1d3a2c; --status-inuse-bg:#1f2f47; --status-used-bg:#3d2c1e;
-  --chip-new:#4a3f12; --chip-new-border:#7d6a1e; --chip-new-ink:#e8cf6a; --chip-inuse:#1f2f47; --chip-inuse-border:#3a5a8a; --chip-used:#35312c; --chip-used-border:#5a534a; --chip-used-ink:#bdb0a0; --neon-bg:#2c4a12; --neon-ink:#c9ff7a; --neon-border:#5f9a2a; --neon-glow:rgba(150,255,60,.55);
+  --chip-new:#4a3f12; --chip-new-border:#7d6a1e; --chip-new-ink:#e8cf6a; --chip-inuse:#1f2f47; --chip-inuse-border:#3a5a8a; --chip-used:#35312c; --chip-used-border:#5a534a; --chip-used-ink:#bdb0a0; --neon-bg:#243a14; --neon-ink:#c9ff7a; --neon-border:#6fae35; --neon-glow:rgba(150,255,60,.45);
   --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 28px -14px rgba(0,0,0,.6);
 }
 *{box-sizing:border-box}
@@ -211,9 +211,9 @@ dialog.wide{width:min(760px,calc(100vw - 32px))}
 .chip .cyl{width:12px;height:18px;flex:none}
 .chip .cnt{font-variant-numeric:tabular-nums}
 .chip .cnt::before{content:"×";color:var(--text-3);margin-right:1px;font-weight:500}
-.chip.new{background:var(--surface);border-color:var(--border-strong)}
-.tag-new{display:inline-block;margin-left:3px;font-size:8.5px;font-weight:900;letter-spacing:.12em;padding:2px 5px 2px 6px;border-radius:5px;line-height:1;
-  background:var(--neon-bg);color:var(--neon-ink);border:1px solid var(--neon-border);box-shadow:0 0 6px var(--neon-glow),inset 0 0 4px rgba(255,255,255,.5);text-shadow:0 0 3px var(--neon-glow)}
+.chip.new{background:var(--neon-bg);border-color:var(--neon-border);box-shadow:0 0 7px var(--neon-glow),0 0 1px var(--neon-border);animation:neon 3.2s ease-in-out infinite}
+@keyframes neon{0%,100%{box-shadow:0 0 5px var(--neon-glow),0 0 1px var(--neon-border)}50%{box-shadow:0 0 11px var(--neon-glow),0 0 2px var(--neon-border)}}
+@media (prefers-reduced-motion:reduce){.chip.new{animation:none}}
 .chip.inuse{background:var(--chip-inuse);border-color:var(--chip-inuse-border)}
 .chip.used{background:var(--chip-used);border-color:var(--chip-used-border)}
 .srow{display:flex;align-items:flex-start;gap:8px}
@@ -262,8 +262,7 @@ dialog.wide{width:min(760px,calc(100vw - 32px))}
 .legend .sep{width:1px;height:16px;background:var(--border-strong)}
 .legend .li .dot{width:8px;height:8px;border-radius:50%}
 .legend .li .st{width:26px;height:16px;border-radius:5px;border:1px solid}
-.legend .li .st.new{background:var(--surface);border-color:var(--border-strong);display:inline-flex;align-items:center;justify-content:center;width:auto;padding:0 3px}
-.legend .li .st.new .tag-new{margin:0}
+.legend .li .st.new{background:var(--neon-bg);border-color:var(--neon-border);box-shadow:0 0 6px var(--neon-glow)}
 .legend .li .st.inuse{background:var(--chip-inuse);border-color:var(--chip-inuse-border)}
 .legend .li .st.used{background:var(--chip-used);border-color:var(--chip-used-border)}
 
@@ -698,7 +697,7 @@ function render(){
   const STATUS_ROWS = [['new','New'],['inuse','In use'],['used','Used']];
   const chipHTML = (lab, id, status, count) => {
     const g = gasById(id);
-    return `<span class="chip ${status}" data-lab="${lab}" data-gas="${id}" data-status="${status}">${cylSVG(g.color)}<span>${g.label}</span><span class="cnt">${count}</span>${status==='new' ? '<span class="tag-new">NEW</span>' : ''}</span>`;
+    return `<span class="chip ${status}" data-lab="${lab}" data-gas="${id}" data-status="${status}">${cylSVG(g.color)}<span>${g.label}</span><span class="cnt">${count}</span></span>`;
   };
   const rowsHTML = (lab, perGas) => STATUS_ROWS.map(([st,label]) => {
     const ids = Object.keys(perGas).filter(id => perGas[id][st] > 0).sort((a,b)=> order.indexOf(a)-order.indexOf(b));
@@ -726,7 +725,7 @@ function render(){
   const legendGases = allGases().filter(g=>used.has(g.id));
   document.getElementById('legend').innerHTML =
     (legendGases.length ? legendGases.map(g=>`<span class="li"><span class="sw" style="background:${g.color}"></span>${g.label} <span class="muted">${g.name}</span></span>`).join('') + '<span class="sep"></span>' : '') +
-    `<span class="li"><span class="st new"><span class="tag-new">NEW</span></span>New</span>
+    `<span class="li"><span class="st new"></span>New</span>
      <span class="li"><span class="st inuse"></span>In use</span>
      <span class="li"><span class="st used"></span>Used</span>`;
 
@@ -751,9 +750,7 @@ function render(){
     const g = gasById(id), grp = groups[id];
     const labLines = LAB_ORDER.filter(l => grp.labs[l]).concat(Object.keys(grp.labs).filter(l=>!LAB_ORDER.includes(l))).map(l => {
       const c = grp.labs[l], lab = LABS[l] || { num:l, name:'' };
-      const chips = STATUS_ROWS.filter(([st]) => c[st] > 0).map(([st,label]) => st==='new'
-        ? `<span class="chip new"><span class="tag-new" style="margin:0">NEW</span><span class="cnt">${c[st]}</span></span>`
-        : `<span class="chip ${st}"><span>${label}</span><span class="cnt">${c[st]}</span></span>`).join('');
+      const chips = STATUS_ROWS.filter(([st]) => c[st] > 0).map(([st,label]) => `<span class="chip ${st}"><span>${label}</span><span class="cnt">${c[st]}</span></span>`).join('');
       return `<div class="gline"><span class="loc"><b>${lab.num}</b> ${lab.name}</span><span class="gc">${chips}${c.notes.length ? `<span class="gnote">${escapeHtml(c.notes.join(' · '))}</span>` : ''}</span><button class="rowbtn" data-edit-room="${l}">Edit</button></div>`;
     }).join('');
     return `<div class="ggroup"><div class="gh">${cylSVG(g.color)}<span class="gn">${g.label}</span><span class="gd">${g.name!==g.label ? g.name : ''}</span><span class="gt">${grp.total} <small>cylinder${grp.total>1?'s':''}</small></span></div>${labLines}</div>`;
