@@ -167,7 +167,7 @@ section.card{
   grid-template-areas:
     "sum  sum   sum  .    r472 r474"
     "r460 vhall hall hall hall hall"
-    "r460 vhall r458 .    .    .";
+    "r460 vhall r458 req  req  req";
   background:var(--surface-2);border:1px solid var(--border);border-radius:14px;padding:14px;
 }
 .room{
@@ -227,6 +227,20 @@ dialog.wide{width:min(760px,calc(100vw - 32px))}
 .summary{grid-area:sum;background:var(--surface);border:1.5px solid var(--text);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:8px}
 .summary .sh{display:flex;align-items:center;gap:8px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);font-weight:700}
 .summary .chips{display:flex;flex-direction:column;gap:8px}
+.requests{grid-area:req;background:var(--surface);border:1.5px solid var(--text);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:8px;min-height:150px}
+.requests .sh{display:flex;align-items:center;gap:8px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);font-weight:700}
+.requests .sh .cnt{background:var(--surface-2);border:1px solid var(--border);border-radius:999px;padding:1px 8px;font-variant-numeric:tabular-nums;color:var(--text-2)}
+.requests .sh .btn{margin-left:auto;padding:7px 11px;font-size:13px}
+.rq{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:6px 10px;align-items:center;padding:8px 10px;border:1px solid var(--border);border-radius:10px;background:var(--surface-2)}
+.rq .who{font-size:13px;color:var(--text-2);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rq .who b{color:var(--text);font-weight:700}
+.rq .when{font-size:11.5px;color:var(--text-3)}
+.rq .done{border:1px solid var(--border-strong);background:var(--surface);border-radius:8px;padding:5px 9px;font-size:12px;font-weight:700;color:var(--text-2);white-space:nowrap}
+.rq .done:hover{background:var(--status-new-bg);color:var(--status-new);border-color:var(--status-new)}
+.rq .rnote{grid-column:1 / -1;font-size:12px;color:var(--text-3)}
+.rq .chip{padding:4px 8px 4px 5px}
+.requests .empty{font-size:12.5px;color:var(--text-3);font-style:italic}
+.requests .blocked{font-size:12.5px;color:var(--danger)}
 .corridor{background:var(--corridor);border-radius:10px;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
 .corridor span{font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--text-3);font-weight:700;background:var(--corridor);padding:0 8px;position:relative;z-index:1}
 .corridor::before{content:"";position:absolute;background:repeating-linear-gradient(90deg,var(--corridor-line) 0 10px,transparent 10px 18px)}
@@ -246,14 +260,14 @@ dialog.wide{width:min(760px,calc(100vw - 32px))}
 .tip .row{display:flex;justify-content:space-between;gap:14px}
 
 @media (max-width:900px){
-  .map{grid-template-columns:1fr 1fr;grid-template-rows:auto;grid-template-areas:"sum sum" "r460 r458" "r472 r474"}
+  .map{grid-template-columns:1fr 1fr;grid-template-rows:auto;grid-template-areas:"sum sum" "r460 r458" "r472 r474" "req req"}
   .corridor{display:none}
 }
 @media (max-width:700px){
   .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
   .stat .v{font-size:26px}
 }
-@media (max-width:560px){.map{grid-template-columns:1fr;grid-template-areas:"sum" "r460" "r458" "r472" "r474"}}
+@media (max-width:560px){.map{grid-template-columns:1fr;grid-template-areas:"sum" "r460" "r458" "r472" "r474" "req"}}
 
 /* legend */
 .legend{display:flex;flex-wrap:wrap;gap:8px 14px;margin-top:12px;align-items:center}
@@ -441,6 +455,14 @@ dialog::backdrop{background:rgba(6,12,18,.55);backdrop-filter:blur(2px)}
       </div>
       <div class="corridor h" aria-hidden="true"><span>Corridor</span></div>
       <div class="corridor v" aria-hidden="true"><span>Corridor</span></div>
+      <div class="requests" id="requests">
+        <div class="sh">Requests <span class="cnt" id="reqCount">0</span>
+          <button type="button" class="btn primary" id="requestBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Request
+          </button>
+        </div>
+        <div id="reqList"></div>
+      </div>
       <div class="room" id="room-460" data-lab="460" role="button" tabindex="0" aria-label="Room 460 Sorption Lab">
         <div class="rh"><span class="num">460</span><span class="name">Sorption Lab</span><span class="total" data-total></span><button type="button" class="rbtn" data-edit-room="460" title="Edit this room" aria-label="Edit room 460"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>Edit</button></div>
         <div class="chips" data-chips></div>
@@ -543,6 +565,43 @@ dialog::backdrop{background:rgba(6,12,18,.55);backdrop-filter:blur(2px)}
   </form>
 </dialog>
 
+<dialog id="reqDlg">
+  <form method="dialog" id="reqForm">
+    <div class="modal-h"><h3>Request cylinders</h3>
+      <button type="button" class="btn outline icon" id="reqClose" aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+    <div class="modal-b">
+      <div class="field">
+        <label for="rGas">Gas</label>
+        <div class="gas-select-row"><svg class="gas-preview" id="rGasPreview" viewBox="0 0 22 34"></svg><select id="rGas" required></select></div>
+      </div>
+      <div class="field" id="rGasNameField" hidden>
+        <label for="rGasName">New gas name</label>
+        <input id="rGasName" placeholder="e.g. Kr, SF₆, 10% CO₂/N₂" maxlength="24">
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label for="rCount">Quantity</label>
+          <div class="qty"><button type="button" id="rMinus" aria-label="Decrease">−</button><input id="rCount" type="number" min="1" max="99" value="1" required><button type="button" id="rPlus" aria-label="Increase">+</button></div>
+        </div>
+        <div class="field">
+          <label for="rName">Requested by</label>
+          <input id="rName" placeholder="Your name" maxlength="40" required autocomplete="name">
+        </div>
+      </div>
+      <div class="field">
+        <label for="rNote">Note <span class="muted">(optional)</span></label>
+        <input id="rNote" placeholder="e.g. UHP grade, needed by Friday, for GC-2" maxlength="80">
+      </div>
+    </div>
+    <div class="modal-f"><div class="right">
+      <button type="button" class="btn outline" id="reqCancel">Cancel</button>
+      <button type="submit" class="btn primary">Add request</button>
+    </div></div>
+  </form>
+</dialog>
 <dialog id="roomDlg" class="wide">
   <form id="roomForm" method="dialog">
     <div class="modal-h"><h3 id="roomTitle">Edit room</h3>
@@ -637,9 +696,9 @@ let editingId = null;
 function load(){
   try{
     const raw = localStorage.getItem(STORE_KEY);
-    if(raw){ const s = JSON.parse(raw); if(s && Array.isArray(s.entries)) return { entries:s.entries, customGases:s.customGases||[] }; }
+    if(raw){ const s = JSON.parse(raw); if(s && Array.isArray(s.entries)) return { entries:s.entries, customGases:s.customGases||[], requests:Array.isArray(s.requests)?s.requests:[] }; }
   }catch(e){}
-  return { entries:[], customGases:[] };
+  return { entries:[], customGases:[], requests:[] };
 }
 function saveLocal(){
   try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }catch(e){ toast('Could not save to this browser'); }
@@ -719,6 +778,21 @@ function render(){
   for(const e of state.entries){ const g = sumAgg[e.gas] || (sumAgg[e.gas] = { new:0, inuse:0, used:0, total:0 }); g[e.status] += e.count; g.total += e.count; }
   document.querySelector('[data-summary]').innerHTML = Object.keys(sumAgg).length ? rowsHTML('all', sumAgg)
     : '<span class="empty" style="font-size:12px;color:var(--text-3);font-style:italic">no cylinders yet</span>';
+
+  // requests (bottom-right of the map)
+  const reqs = (state.requests || []).slice().sort((a,b)=> b.created - a.created);
+  document.getElementById('reqCount').textContent = reqs.length;
+  document.getElementById('reqList').innerHTML = requestsBlocked
+    ? '<div class="blocked">Requests cannot be read yet — the database rules need the <code>requests</code> read rule from firebase.rules.json.</div>'
+    : (reqs.length ? reqs.map(r => {
+        const g = gasById(r.gas);
+        return `<div class="rq" data-req="${r.id}">
+          <span class="chip">${cylSVG(g.color)}<span>${g.label}</span><span class="cnt">${r.count}</span></span>
+          <span class="who"><b>${escapeHtml(r.name)}</b> <span class="when">· ${fmtDate(r.created)}</span></span>
+          <button type="button" class="done" data-done="${r.id}" title="Mark as received and remove">Done</button>
+          ${r.note ? `<span class="rnote">${escapeHtml(r.note)}</span>` : ''}
+        </div>`;
+      }).join('') : '<div class="empty">No open requests. Use Request to ask for new cylinders.</div>');
 
   // legend
   const used = new Set(state.entries.map(e=>e.gas));
@@ -844,8 +918,8 @@ document.getElementById('qMinus').addEventListener('click', ()=>{ fCount.value =
 document.getElementById('qPlus').addEventListener('click', ()=>{ fCount.value = Math.min(99,(parseInt(fCount.value,10)||0)+1); });
 
 /* ---------- interactions ---------- */
-document.getElementById('addBtn').addEventListener('click', ()=>openAdd(filterLab));
-document.getElementById('emptyAdd').addEventListener('click', ()=>openAdd());
+document.getElementById('addBtn').addEventListener('click', ()=>requirePin(()=>openAdd(filterLab)));
+document.getElementById('emptyAdd').addEventListener('click', ()=>requirePin(()=>openAdd()));
 document.querySelectorAll('.room').forEach(room => {
   const toggle = () => { filterLab = filterLab===room.dataset.lab ? null : room.dataset.lab; render(); };
   room.addEventListener('click', toggle);
@@ -886,6 +960,54 @@ function moveTip(e){
 }
 
 // export / import
+/* ---------- requests ---------- */
+const reqDlg = document.getElementById('reqDlg');
+const NAME_KEY = 'koros-gas-requester';
+function reqGasChange(){
+  const isNew = document.getElementById('rGas').value==='__new';
+  document.getElementById('rGasNameField').hidden = !isNew;
+  document.getElementById('rGasName').required = isNew;
+  const color = isNew ? EXTRA_COLORS[state.customGases.length % EXTRA_COLORS.length] : gasById(document.getElementById('rGas').value).color;
+  document.getElementById('rGasPreview').outerHTML = cylSVG(color,'gas-preview').replace('<svg', '<svg id="rGasPreview"');
+  if(isNew) setTimeout(()=>document.getElementById('rGasName').focus(),0);
+}
+document.getElementById('rGas').addEventListener('change', reqGasChange);
+function openRequest(){
+  document.getElementById('rGas').innerHTML = gasOptions('N2');
+  document.getElementById('rGasName').value = ''; document.getElementById('rCount').value = 1; document.getElementById('rNote').value = '';
+  try{ document.getElementById('rName').value = localStorage.getItem(NAME_KEY) || ''; }catch(e){}
+  reqGasChange();
+  reqDlg.showModal();
+  setTimeout(()=>document.getElementById(document.getElementById('rName').value ? 'rGas' : 'rName').focus(),0);
+}
+document.getElementById('requestBtn').addEventListener('click', ()=>requirePin(openRequest));
+document.getElementById('rMinus').addEventListener('click', ()=>{ const i=document.getElementById('rCount'); i.value = Math.max(1,(parseInt(i.value,10)||1)-1); });
+document.getElementById('rPlus').addEventListener('click', ()=>{ const i=document.getElementById('rCount'); i.value = Math.min(99,(parseInt(i.value,10)||0)+1); });
+document.getElementById('reqForm').addEventListener('submit', ev => {
+  ev.preventDefault();
+  let gas = document.getElementById('rGas').value;
+  if(gas==='__new'){
+    const name = document.getElementById('rGasName').value.trim(); if(!name){ document.getElementById('rGasName').focus(); return; }
+    const newGases = []; gas = resolveGas(name, newGases); state.customGases = state.customGases.concat(newGases);
+  }
+  const count = Math.max(1, Math.min(99, parseInt(document.getElementById('rCount').value,10)||1));
+  const name = document.getElementById('rName').value.trim(); if(!name){ document.getElementById('rName').focus(); return; }
+  try{ localStorage.setItem(NAME_KEY, name); }catch(e){}
+  state.requests = (state.requests || []).concat([{ id:uid(), gas, count, name, note:document.getElementById('rNote').value.trim(), created:Date.now() }]);
+  save(); render(); reqDlg.close();
+  toast(`Requested ${count} × ${gasById(gas).label}`);
+});
+for(const id of ['reqCancel','reqClose']) document.getElementById(id).addEventListener('click', ()=>reqDlg.close());
+reqDlg.addEventListener('click', e => { if(e.target===reqDlg) reqDlg.close(); });
+document.getElementById('reqList').addEventListener('click', e => {
+  const b = e.target.closest('[data-done]'); if(!b) return;
+  requirePin(() => {
+    const r = (state.requests || []).find(x=>x.id===b.dataset.done); if(!r) return;
+    state.requests = state.requests.filter(x=>x.id!==r.id);
+    save(); render(); toast(`Request from ${r.name} marked done`);
+  });
+});
+
 /* ---------- per-room editor ---------- */
 const roomDlg = document.getElementById('roomDlg');
 let roomLab = null;
@@ -951,7 +1073,7 @@ for(const id of ['roomCancel','roomClose']) document.getElementById(id).addEvent
 roomDlg.addEventListener('click', e => { if(e.target===roomDlg) roomDlg.close(); });
 document.addEventListener('click', e => {
   const b = e.target.closest('[data-edit-room]'); if(!b) return;
-  e.stopPropagation(); openRoom(b.dataset.editRoom);
+  e.stopPropagation(); requirePin(()=>openRoom(b.dataset.editRoom));
 }, true);
 document.addEventListener('keydown', e => {
   if(e.key==='a' && roomDlg.open) e.stopImmediatePropagation();
@@ -1061,13 +1183,13 @@ function openReview(result){
   document.getElementById('reviewApply').hidden = !ok;
   reviewDlg.showModal();
 }
-document.getElementById('reviewApply').addEventListener('click', () => {
+document.getElementById('reviewApply').addEventListener('click', () => requirePin(() => {
   if(!pendingImport || pendingImport.errors.length) return;
-  state = { entries: pendingImport.entries, customGases: state.customGases.concat(pendingImport.newGases) };
+  state = { entries: pendingImport.entries, customGases: state.customGases.concat(pendingImport.newGases), requests: state.requests || [] };
   document.getElementById('publishBanner').hidden = true;
   save(); render(); reviewDlg.close(); pendingImport = null;
   toast('Inventory imported');
-});
+}));
 for(const id of ['reviewCancel','reviewClose']) document.getElementById(id).addEventListener('click', ()=>{ pendingImport=null; reviewDlg.close(); });
 reviewDlg.addEventListener('click', e => { if(e.target===reviewDlg){ pendingImport=null; reviewDlg.close(); } });
 
@@ -1088,7 +1210,7 @@ document.getElementById('importFile').addEventListener('change', async e => {
   }
   openReview(parseText(text));
 });
-document.getElementById('sampleBtn').addEventListener('click', () => {
+document.getElementById('sampleBtn').addEventListener('click', () => requirePin(() => {
   const now = Date.now();
   state.entries = [
     { id:uid(), gas:'N2',  count:3, status:'inuse', lab:'460', note:'UHP · sorption rigs', updated:now },
@@ -1104,7 +1226,7 @@ document.getElementById('sampleBtn').addEventListener('click', () => {
     { id:uid(), gas:'H2',  count:1, status:'new',   lab:'474-475', note:'', updated:now },
   ];
   save(); render(); toast('Sample data loaded — edit or delete freely');
-});
+}));
 
 // theme
 const root = document.documentElement;
@@ -1124,7 +1246,7 @@ function toast(msg){
 
 // keyboard: "a" opens add
 document.addEventListener('keydown', e => {
-  if(e.key==='a' && !dlg.open && !/input|select|textarea/i.test(document.activeElement.tagName)) openAdd(filterLab);
+  if(e.key==='a' && !dlg.open && !pinDlg.open && !reqDlg.open && !roomDlg.open && !reviewDlg.open && !/input|select|textarea/i.test(document.activeElement.tagName)) requirePin(()=>openAdd(filterLab));
 });
 
 /* ---------- shared board (Firebase Realtime Database) ---------- */
@@ -1133,6 +1255,11 @@ let remote = null;           // { db, ref, set }
 let remoteReady = false;     // first snapshot received
 let pendingPush = false;
 let lastRemote = null;    // deep copy of the last snapshot from the shared board
+let requestsBlocked = false; // true when the database rules do not allow reading board/requests yet
+function setRemotePart(key, val){
+  if(!lastRemote) lastRemote = { entries: clone(state.entries), customGases: clone(state.customGases), requests: clone(state.requests || []) };
+  lastRemote[key] = clone(val);
+}
 const clone = v => JSON.parse(JSON.stringify(v));
 const pill = document.getElementById('syncPill');
 function setSync(mode, label){
@@ -1142,33 +1269,62 @@ function setSync(mode, label){
     ? 'Data is saved in this browser. Use <b>Export</b> to share the current state and <b>Import</b> to load it elsewhere.'
     : 'Shared board: every change is saved to the lab database and appears for everyone within a second. Editing needs the lab PIN once per browser.';
 }
-function getPin(){ try{ return localStorage.getItem(PIN_KEY) || ''; }catch(e){ return ''; } }
-function setPin(v){ try{ v ? localStorage.setItem(PIN_KEY, v) : localStorage.removeItem(PIN_KEY); }catch(e){} }
+function getPin(){ try{ return sessionStorage.getItem(PIN_KEY) || ''; }catch(e){ return ''; } }
+function setPin(v){ try{ v ? sessionStorage.setItem(PIN_KEY, v) : sessionStorage.removeItem(PIN_KEY); }catch(e){} }
+try{ localStorage.removeItem(PIN_KEY); }catch(e){}
 function toArray(v){ if(!v) return []; return Array.isArray(v) ? v.filter(Boolean) : Object.values(v); }
 
 const pinDlg = document.getElementById('pinDlg');
-function openPin(msg){
-  document.getElementById('pinHelp').textContent = msg || 'Changes are shared with everyone in the lab. Enter the lab PIN once to enable editing from this browser.';
+let pinCallback = null;   // action to run once the PIN is accepted
+function openPin(msg, cb){
+  pinCallback = cb || null;
+  document.getElementById('pinHelp').textContent = msg || 'Editing the shared board needs the lab PIN. It is remembered until you close this browser tab.';
   document.getElementById('forgetPin').hidden = !getPin();
   document.getElementById('fPin').value = '';
   if(!pinDlg.open) pinDlg.showModal();
+  setTimeout(()=>document.getElementById('fPin').focus(), 0);
 }
-document.getElementById('pinForm').addEventListener('submit', e => {
+// Check a PIN against the database without changing the inventory (rewrites the current board with a new timestamp).
+async function verifyPin(pin){
+  if(!remote || !lastRemote) return true;
+  const candidates = /^\d+$/.test(pin) ? [pin, Number(pin)] : [pin];
+  for(const p of candidates){
+    try{
+      await remote.set(remote.ref(remote.db, 'board'), { ...clone(lastRemote), meta: { pin: p, updatedAt: Date.now() } });
+      acceptedPin = p; return true;
+    }catch(err){ if(!/permission/i.test(String(err && (err.code || err.message) || err))) return true; }
+  }
+  return false;
+}
+// Run an editing action only after the lab PIN is known for this session.
+function requirePin(action){
+  if(!remote || getPin()) return action();
+  openPin(null, action);
+}
+document.getElementById('pinForm').addEventListener('submit', async e => {
   e.preventDefault();
-  setPin(document.getElementById('fPin').value.trim());
+  const pin = document.getElementById('fPin').value.trim();
+  if(!pin) return;
+  const btn = document.querySelector('#pinForm button[type=submit]'); btn.disabled = true; btn.textContent = 'Checking…';
+  const ok = await verifyPin(pin);
+  btn.disabled = false; btn.textContent = 'Continue';
+  if(!ok){ setPin(''); document.getElementById('pinHelp').textContent = 'That PIN was not accepted. Ask the lab for the current PIN and try again.'; document.getElementById('fPin').value=''; document.getElementById('fPin').focus(); return; }
+  setPin(pin);
   pinDlg.close();
-  if(pendingPush){ pendingPush=false; pushRemote(); }
+  const cb = pinCallback; pinCallback = null;
+  if(cb) cb();
+  else if(pendingPush){ pendingPush=false; pushRemote(); }
 });
 document.getElementById('pinCancel').addEventListener('click', ()=>{
-  pinDlg.close();
+  pinDlg.close(); pinCallback = null;
   if(pendingPush && lastRemote){ // drop the unsaved local change and show the shared state again
     state = clone(lastRemote);
     saveLocal(); render(); toast('Change discarded — the lab PIN is needed to edit the shared board');
   }
   pendingPush = false;
 });
-document.getElementById('forgetPin').addEventListener('click', ()=>{ setPin(''); pinDlg.close(); toast('PIN removed from this browser'); });
-pill.addEventListener('click', ()=>{ if(remote) openPin('Enter a new lab PIN for this browser, or forget the stored one.'); else toast('Shared board not configured — see README'); });
+document.getElementById('forgetPin').addEventListener('click', ()=>{ setPin(''); acceptedPin = null; pinCallback = null; pinDlg.close(); toast('PIN forgotten — it will be asked again before the next edit'); });
+pill.addEventListener('click', ()=>{ if(remote) openPin(getPin() ? 'PIN is set for this tab. Enter a different one, or forget it.' : null); else toast('Shared board not configured — see README'); });
 
 let acceptedPin = null;   // the PIN representation (string or number) the database last accepted
 async function pushRemote(){
@@ -1176,7 +1332,7 @@ async function pushRemote(){
   const pin = getPin();
   if(!pin){ pendingPush = true; openPin(); return; }
   // Capture the payload now: a rejected attempt makes the SDK revert local state to the server copy.
-  const payload = { entries: clone(state.entries), customGases: clone(state.customGases) };
+  const payload = { entries: clone(state.entries), customGases: clone(state.customGases), requests: clone(state.requests || []) };
   // The console may store the PIN as a string or a number; the rule compares type too, so try both.
   let candidates = /^\d+$/.test(pin) ? [pin, Number(pin)] : [pin];
   if(acceptedPin !== null && candidates.some(c => c === acceptedPin)) candidates = [acceptedPin];
@@ -1216,14 +1372,20 @@ async function initRemote(){
           document.getElementById('publishBanner').hidden = false; return;
         }
       }
-      lastRemote = { entries: clone(incoming), customGases: clone(lastRemote ? lastRemote.customGases : state.customGases) };
+      setRemotePart('entries', incoming);
       if(document.getElementById('publishBanner').hidden){ state.entries = incoming; saveLocal(); render(); }
     });
     onValue(ref(db, 'board/customGases'), snap => {
       const incoming = toArray(snap.val());
-      lastRemote = { entries: clone(lastRemote ? lastRemote.entries : state.entries), customGases: clone(incoming) };
+      setRemotePart('customGases', incoming);
       if(document.getElementById('publishBanner').hidden){ state.customGases = incoming; saveLocal(); render(); }
     });
+    onValue(ref(db, 'board/requests'), snap => {
+      const incoming = toArray(snap.val());
+      setRemotePart('requests', incoming);
+      requestsBlocked = false;
+      if(document.getElementById('publishBanner').hidden){ state.requests = incoming; saveLocal(); render(); }
+    }, err => { requestsBlocked = true; render(); });
     onValue(ref(db, '.info/connected'), snap => setSync(snap.val() ? 'live' : 'offline', snap.val() ? 'Live · shared board' : 'Offline · reconnecting'));
   }catch(err){
     remote = null; setSync('offline','Shared board unavailable');
@@ -1231,7 +1393,7 @@ async function initRemote(){
   }
 }
 document.getElementById('publishLocal').addEventListener('click', ()=>{ document.getElementById('publishBanner').hidden = true; pushRemote(); });
-document.getElementById('discardLocal').addEventListener('click', ()=>{ document.getElementById('publishBanner').hidden = true; state = { entries:[], customGases:[] }; saveLocal(); render(); });
+document.getElementById('discardLocal').addEventListener('click', ()=>{ document.getElementById('publishBanner').hidden = true; state = { entries:[], customGases:[], requests: state.requests || [] }; saveLocal(); render(); });
 
 render();
 initRemote();

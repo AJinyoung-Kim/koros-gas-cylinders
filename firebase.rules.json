@@ -3,9 +3,20 @@
     "board": {
       ".read": false,
       ".write": "newData.child('meta').child('pin').val() === root.child('secret').child('pin').val()",
-      "entries": { ".read": true },
-      "customGases": { ".read": true },
-      "meta": { "updatedAt": { ".read": true } }
+      "entries": {
+        ".read": true
+      },
+      "customGases": {
+        ".read": true
+      },
+      "meta": {
+        "updatedAt": {
+          ".read": true
+        }
+      },
+      "requests": {
+        ".read": true
+      }
     },
     "secret": {
       ".read": false,

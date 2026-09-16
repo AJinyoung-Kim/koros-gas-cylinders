@@ -14,6 +14,8 @@ A single-page status board for the gas cylinders stored in the Koros Lab rooms
 - The inventory list is grouped by gas, one line per room, so you can see at a glance where each gas is and in what state.
 - Gases not in the list can be added with "Other gas…"; they get their own color automatically.
 - **Export** downloads the inventory as a plain-text file; **Import** reads that file (or the blank `inventory-template.txt`) back after you edit it, shows a preview with any problems, and replaces the board on confirm.
+- **Request** (bottom-right of the floor map) records a cylinder request: gas, quantity, who asked, optional note. Open requests are shared with everyone; **Done** removes one once the cylinders arrive.
+- Editing (Add, Edit, Request, Import) asks for the lab PIN once per browser tab.
 - Dark mode toggle, works on phones.
 
 ## Inventory text file
@@ -59,7 +61,9 @@ The header pill shows which mode is active (Local only / Live · shared board / 
 5. **Project settings (gear) → Your apps → Web (</>)**, register the app, and copy the `firebaseConfig` object.
 6. Paste it into `config.js` as `window.KOROS_CONFIG = { firebase: { ... } }` and push. The next page load is live.
 
-Anyone with the link can *view* the board. Only people who know the lab PIN can change it; a wrong PIN is rejected by the database rules, not just by the page.
+Anyone with the link can *view* the board. Only people who know the lab PIN can change it; a wrong PIN is rejected by the database rules, not just by the page. The PIN is asked before the first Add / Edit / Request / Import in a browser tab and kept until the tab is closed.
+
+If you set the rules up before requests existed, paste the current `firebase.rules.json` into the Rules tab again and Publish, otherwise the page shows a notice that requests cannot be read.
 
 If a browser already has local data when it first connects to an empty shared board, the page asks whether to publish that data or discard it, so nothing is overwritten silently.
 
