@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Koros Lab Gas Cylinders</title>
+<meta name="description" content="Live overview of gas cylinders stored in each Koros Lab room.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='9' y='6' width='14' height='24' rx='4' fill='%232a78d6'/%3E%3Crect x='13' y='2' width='6' height='5' rx='1.5' fill='%231b4f8a'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme:light;
+  --bg:#f3f5f7;
+  --surface:#ffffff;
+  --surface-2:#f7f9fb;
+  --border:#e1e6eb;
+  --border-strong:#c9d1d9;
+  --text:#0f1720;
+  --text-2:#4b5563;
+  --text-3:#8a94a0;
+  --brand:#155e75;
+  --brand-2:#0e4a5c;
+  --brand-ink:#ffffff;
+  --accent:#2a78d6;
+  --danger:#c2410c;
+  --room:#155e75;
+  --room-ink:#ffffff;
+  --room-sub:#f8e71c;
+  --corridor:#d5dde4;
+  --status-new:#1a8f5c;
+  --status-inuse:#2a78d6;
+  --status-used:#a1652c;
+  --status-new-bg:#e3f5ec;
+  --status-inuse-bg:#e4eefb;
+  --status-used-bg:#f6ebe0;
+  --shadow:0 1px 2px rgba(15,23,32,.06),0 8px 24px -12px rgba(15,23,32,.18);
+  --radius:14px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0f1418; --surface:#171d23; --surface-2:#1d252c;
+    --border:#2a333c; --border-strong:#3a4650;
+    --text:#f1f4f7; --text-2:#b7c0c9; --text-3:#7f8b96;
+    --brand:#0f4b5e; --brand-2:#0b3a49;
+    --room:#186a83; --corridor:#2b3640;
+    --status-new:#3dc283; --status-inuse:#5b9cf0; --status-used:#d69a5d;
+    --status-new-bg:#123526; --status-inuse-bg:#16294a; --status-used-bg:#3a2a18;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -12px rgba(0,0,0,.6);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0f1418; --surface:#171d23; --surface-2:#1d252c;
+  --border:#2a333c; --border-strong:#3a4650;
+  --text:#f1f4f7; --text-2:#b7c0c9; --text-3:#7f8b96;
+  --brand:#0f4b5e; --brand-2:#0b3a49;
+  --room:#186a83; --corridor:#2b3640;
+  --status-new:#3dc283; --status-inuse:#5b9cf0; --status-used:#d69a5d;
+  --status-new-bg:#123526; --status-inuse-bg:#16294a; --status-used-bg:#3a2a18;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -12px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{
+  background:var(--bg); color:var(--text);
+  font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  font-size:15px; line-height:1.45; -webkit-font-smoothing:antialiased;
+}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+.wrap{max-width:1180px;margin:0 auto;padding:0 16px}
+
+/* ---------- header ---------- */
+header.top{
+  background:linear-gradient(135deg,var(--brand) 0%,var(--brand-2) 100%);
+  color:var(--brand-ink);
+  padding:28px 0 26px;
+  position:relative; overflow:hidden;
+}
+header.top::after{
+  content:""; position:absolute; inset:auto -10% -60% auto; width:520px; height:520px;
+  border-radius:50%; background:rgba(255,255,255,.06); pointer-events:none;
+}
+.top-row{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.title-block h1{margin:0;font-size:clamp(22px,3.2vw,30px);font-weight:800;letter-spacing:-.02em;line-height:1.15}
+.title-block .sub{margin:6px 0 0;color:rgba(255,255,255,.72);font-size:14px}
+.top-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.btn{
+  display:inline-flex;align-items:center;gap:8px;
+  border:1px solid transparent;border-radius:10px;padding:10px 14px;
+  font-weight:600;font-size:14px;line-height:1;transition:transform .08s,background .15s,border-color .15s;
+  background:var(--surface);color:var(--text);
+}
+.btn:active{transform:translateY(1px)}
+.btn.primary{background:#ffffff;color:var(--brand-2)}
+.btn.primary:hover{background:#eaf4f8}
+.btn.ghost{background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.22)}
+.btn.ghost:hover{background:rgba(255,255,255,.2)}
+.btn.outline{background:transparent;border-color:var(--border-strong);color:var(--text-2)}
+.btn.outline:hover{background:var(--surface-2)}
+.btn.danger{background:transparent;border-color:var(--danger);color:var(--danger)}
+.btn.danger:hover{background:rgba(194,65,12,.08)}
+.btn svg{width:16px;height:16px}
+.btn.icon{padding:10px;width:38px;height:38px;justify-content:center}
+
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:22px}
+.stat{
+  background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.18);
+  border-radius:12px;padding:12px 14px;backdrop-filter:blur(4px);
+}
+.stat .k{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.75);font-weight:600;display:flex;align-items:center;gap:6px}
+.stat .k i{width:8px;height:8px;border-radius:50%;display:inline-block;background:currentColor}
+.stat .v{font-size:30px;font-weight:800;letter-spacing:-.02em;margin-top:2px;font-variant-numeric:tabular-nums;line-height:1.1}
+.stat.total{background:rgba(255,255,255,.18)}
+.stat.new .k i{color:#7ee2b0}
+.stat.inuse .k i{color:#9cc4f5}
+.stat.used .k i{color:#f2c08c}
+
+/* ---------- sections ---------- */
+main{padding:22px 0 60px}
+section.card{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  box-shadow:var(--shadow);padding:18px;margin-bottom:18px;
+}
+.card-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.card-head h2{margin:0;font-size:16px;font-weight:700;letter-spacing:-.01em}
+.card-head .hint{color:var(--text-3);font-size:13px}
+
+/* ---------- floor map ---------- */
+.map{
+  position:relative;width:100%;aspect-ratio:1.95/1;
+  background:var(--surface-2);border:1px solid var(--border);border-radius:12px;overflow:hidden;
+}
+.map svg.floor{position:absolute;inset:0;width:100%;height:100%}
+.room{
+  position:absolute;background:var(--room);color:var(--room-ink);
+  border-radius:10px;padding:10px 10px 8px;display:flex;flex-direction:column;gap:6px;
+  box-shadow:0 2px 0 rgba(0,0,0,.15) inset,0 6px 18px -8px rgba(0,0,0,.45);
+  cursor:pointer;transition:outline-color .15s,transform .12s;outline:3px solid transparent;outline-offset:2px;
+}
+.room:hover{transform:translateY(-1px)}
+.room.active{outline-color:var(--accent)}
+.room .rh{display:flex;align-items:center;gap:8px;flex-wrap:wrap;line-height:1.1}
+.room .name{flex-basis:100%;order:3;margin-top:-2px}
+.room .num{font-size:clamp(15px,1.9vw,22px);font-weight:800;letter-spacing:-.02em}
+.room .name{font-size:clamp(11px,1.15vw,13px);font-weight:600;color:var(--room-sub)}
+.room .total{margin-left:auto;font-size:12px;font-weight:600;background:rgba(255,255,255,.16);padding:2px 8px;border-radius:999px;font-variant-numeric:tabular-nums}
+.room .chips{display:flex;flex-wrap:wrap;gap:5px;align-content:flex-start;overflow:auto;flex:1;min-height:0;scrollbar-width:thin}
+.room .empty{font-size:12px;color:rgba(255,255,255,.55);font-style:italic}
+.chip{
+  display:inline-flex;align-items:center;gap:5px;
+  background:rgba(255,255,255,.94);color:#0f1720;border-radius:8px;padding:3px 7px 3px 4px;
+  font-size:12px;font-weight:600;line-height:1;white-space:nowrap;position:relative;
+}
+.chip .cyl{width:12px;height:18px;flex:none}
+.chip .cnt{font-variant-numeric:tabular-nums;color:#0f1720}
+.chip .cnt::before{content:"×";color:#8a94a0;margin-right:1px;font-weight:500}
+.chip .dots{display:inline-flex;gap:2px;margin-left:2px}
+.chip .dots i{width:5px;height:5px;border-radius:50%;display:inline-block}
+.chip .dots i.new{background:var(--status-new)}
+.chip .dots i.inuse{background:var(--status-inuse)}
+.chip .dots i.used{background:var(--status-used)}
+/* tooltip */
+.tip{
+  position:fixed;z-index:50;pointer-events:none;background:var(--text);color:var(--bg);
+  padding:8px 10px;border-radius:8px;font-size:12px;line-height:1.4;box-shadow:var(--shadow);
+  opacity:0;transform:translateY(4px);transition:opacity .12s,transform .12s;max-width:240px;
+}
+.tip.show{opacity:1;transform:translateY(0)}
+.tip b{font-weight:700}
+.tip .row{display:flex;justify-content:space-between;gap:14px}
+
+/* room placements (percent of map box) */
+#room-460{left:2.2%;top:28.5%;width:14%;height:66%}
+#room-458{left:22%;top:36%;width:15%;height:52%}
+#room-472{left:52%;top:2.5%;width:14.5%;height:26%}
+#room-474{left:73%;top:2.5%;width:25%;height:26%}
+
+@media (max-width:700px){
+  .map{aspect-ratio:auto;padding:12px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .map svg.floor{display:none}
+  .map > .room{position:static!important;left:auto!important;top:auto!important;width:auto!important;height:auto!important;min-height:130px}
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .stat .v{font-size:26px}
+}
+@media (max-width:460px){.map{grid-template-columns:1fr}}
+
+/* legend */
+.legend{display:flex;flex-wrap:wrap;gap:8px 14px;margin-top:12px;align-items:center}
+.legend .li{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--text-2)}
+.legend .li .sw{width:10px;height:16px;border-radius:3px}
+.legend .sep{width:1px;height:16px;background:var(--border-strong)}
+.legend .li .dot{width:8px;height:8px;border-radius:50%}
+
+/* ---------- inventory ---------- */
+.filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.seg{display:inline-flex;background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:3px}
+.seg button{border:0;background:transparent;padding:6px 11px;border-radius:7px;font-size:13px;font-weight:600;color:var(--text-2)}
+.seg button.on{background:var(--surface);color:var(--text);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.table-wrap{overflow:auto;border:1px solid var(--border);border-radius:10px}
+table{width:100%;border-collapse:collapse;font-size:14px;min-width:640px}
+th{background:var(--surface-2);text-align:left;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--text-3);font-weight:600;padding:10px 12px;border-bottom:1px solid var(--border)}
+td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover td{background:var(--surface-2)}
+td.num{font-variant-numeric:tabular-nums;font-weight:700;text-align:right}
+th.num{text-align:right}
+.gas-cell{display:flex;align-items:center;gap:8px;font-weight:600}
+.gas-cell .cyl{width:12px;height:18px}
+.badge{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:3px 9px;font-size:12px;font-weight:600}
+.badge i{width:6px;height:6px;border-radius:50%;background:currentColor}
+.badge.new{background:var(--status-new-bg);color:var(--status-new)}
+.badge.inuse{background:var(--status-inuse-bg);color:var(--status-inuse)}
+.badge.used{background:var(--status-used-bg);color:var(--status-used)}
+.lab-cell{color:var(--text-2)}
+.lab-cell b{color:var(--text);font-weight:700}
+.muted{color:var(--text-3);font-size:12.5px}
+.rowbtn{border:1px solid var(--border-strong);background:var(--surface);border-radius:8px;padding:6px 10px;font-size:13px;font-weight:600;color:var(--text-2)}
+.rowbtn:hover{background:var(--surface-2);color:var(--text)}
+.empty-state{text-align:center;padding:40px 16px;color:var(--text-3)}
+.empty-state p{margin:0 0 12px}
+.empty-state .btn{margin:0 4px}
+.foot{color:var(--text-3);font-size:12.5px;margin-top:14px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+
+/* ---------- modal ---------- */
+dialog{
+  border:0;border-radius:16px;padding:0;background:var(--surface);color:var(--text);
+  width:min(480px,calc(100vw - 32px));box-shadow:0 30px 80px -20px rgba(0,0,0,.45);
+}
+dialog::backdrop{background:rgba(6,12,18,.55);backdrop-filter:blur(2px)}
+.modal-h{display:flex;justify-content:space-between;align-items:center;padding:18px 20px 0}
+.modal-h h3{margin:0;font-size:17px;font-weight:700}
+.modal-b{padding:16px 20px 4px;display:grid;gap:14px}
+.field{display:grid;gap:6px}
+.field label{font-size:12.5px;font-weight:600;color:var(--text-2)}
+.field input,.field select,.field textarea{
+  width:100%;border:1px solid var(--border-strong);background:var(--surface);border-radius:10px;padding:10px 12px;font-size:14px;
+}
+.field input:focus,.field select:focus,.field textarea:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:transparent}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.status-pick{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.status-pick label{
+  border:1px solid var(--border-strong);border-radius:10px;padding:9px 6px;text-align:center;font-size:13px;font-weight:600;color:var(--text-2);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.status-pick label i{width:8px;height:8px;border-radius:50%}
+.status-pick input{position:absolute;opacity:0;pointer-events:none}
+.status-pick label.new i{background:var(--status-new)}
+.status-pick label.inuse i{background:var(--status-inuse)}
+.status-pick label.used i{background:var(--status-used)}
+.status-pick input:checked + label{border-color:var(--accent);background:var(--status-inuse-bg);color:var(--text)}
+.status-pick input:checked + label.new{background:var(--status-new-bg)}
+.status-pick input:checked + label.used{background:var(--status-used-bg)}
+.gas-select-row{display:flex;gap:8px;align-items:center}
+.gas-select-row select{flex:1}
+.gas-preview{width:22px;height:34px;flex:none}
+.modal-f{display:flex;justify-content:space-between;gap:8px;padding:14px 20px 20px;flex-wrap:wrap}
+.modal-f .right{display:flex;gap:8px;margin-left:auto}
+.qty{display:flex;align-items:stretch}
+.qty button{width:40px;border:1px solid var(--border-strong);background:var(--surface-2);font-size:18px;font-weight:600;color:var(--text-2)}
+.qty button:first-child{border-radius:10px 0 0 10px;border-right:0}
+.qty button:last-child{border-radius:0 10px 10px 0;border-left:0}
+.qty input{border-radius:0!important;text-align:center;font-weight:700;font-variant-numeric:tabular-nums}
+.toast{
+  position:fixed;left:50%;bottom:24px;transform:translate(-50%,12px);background:var(--text);color:var(--bg);
+  padding:10px 16px;border-radius:10px;font-size:13.5px;font-weight:600;opacity:0;transition:.2s;pointer-events:none;z-index:60;box-shadow:var(--shadow);
+}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="top-row">
+      <div class="title-block">
+        <h1>Koros Lab Gas Cylinders Status</h1>
+        <p class="sub">Rooms 458 · 460 · 472 · 474–475 &nbsp;·&nbsp; <span id="lastUpdated">No records yet</span></p>
+      </div>
+      <div class="top-actions">
+        <button class="btn ghost icon" id="themeBtn" title="Toggle dark mode" aria-label="Toggle dark mode">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+        </button>
+        <button class="btn ghost" id="exportBtn" title="Download inventory as JSON">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+          Export
+        </button>
+        <button class="btn ghost" id="importBtn" title="Load inventory from JSON">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="m7 8 5-5 5 5"/><path d="M5 21h14"/></svg>
+          Import
+        </button>
+        <input type="file" id="importFile" accept="application/json" class="sr">
+        <button class="btn primary" id="addBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          Add
+        </button>
+      </div>
+    </div>
+
+    <div class="stats" id="stats">
+      <div class="stat total"><div class="k">Total cylinders</div><div class="v" id="stTotal">0</div></div>
+      <div class="stat inuse"><div class="k"><i></i>In use</div><div class="v" id="stInuse">0</div></div>
+      <div class="stat new"><div class="k"><i></i>New</div><div class="v" id="stNew">0</div></div>
+      <div class="stat used"><div class="k"><i></i>Used</div><div class="v" id="stUsed">0</div></div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="card">
+    <div class="card-head">
+      <h2>Floor map</h2>
+      <span class="hint">Click a room to filter the list · hover a chip for the New / In use / Used breakdown</span>
+    </div>
+    <div class="map" id="map">
+      <svg class="floor" viewBox="0 0 1000 513" preserveAspectRatio="none" aria-hidden="true">
+        <!-- corridors -->
+        <line x1="162" y1="146" x2="1000" y2="146" stroke="var(--corridor)" stroke-width="3"/>
+        <line x1="220" y1="185" x2="1000" y2="185" stroke="var(--corridor)" stroke-width="3"/>
+        <line x1="180" y1="146" x2="180" y2="513" stroke="var(--corridor)" stroke-width="3"/>
+        <line x1="1000" y1="146" x2="1000" y2="185" stroke="var(--corridor)" stroke-width="3"/>
+        <text x="600" y="170" font-size="12" fill="var(--text-3)" font-weight="600" letter-spacing="3" text-anchor="middle" font-family="Inter,sans-serif">CORRIDOR</text>
+        <text x="184" y="500" font-size="11" fill="var(--text-3)" font-weight="600" letter-spacing="2" font-family="Inter,sans-serif" transform="rotate(-90 184 500)">CORRIDOR</text>
+      </svg>
+      <div class="room" id="room-460" data-lab="460" role="button" tabindex="0" aria-label="Room 460 Sorption Lab">
+        <div class="rh"><span class="num">460</span><span class="name">Sorption Lab</span><span class="total" data-total></span></div>
+        <div class="chips" data-chips></div>
+      </div>
+      <div class="room" id="room-458" data-lab="458" role="button" tabindex="0" aria-label="Room 458 Perm1">
+        <div class="rh"><span class="num">458</span><span class="name">Perm1</span><span class="total" data-total></span></div>
+        <div class="chips" data-chips></div>
+      </div>
+      <div class="room" id="room-472" data-lab="472" role="button" tabindex="0" aria-label="Room 472 Instrument">
+        <div class="rh"><span class="num">472</span><span class="name">Instrument</span><span class="total" data-total></span></div>
+        <div class="chips" data-chips></div>
+      </div>
+      <div class="room" id="room-474" data-lab="474-475" role="button" tabindex="0" aria-label="Room 474-475 Perm2">
+        <div class="rh"><span class="num">474–475</span><span class="name">Perm2</span><span class="total" data-total></span></div>
+        <div class="chips" data-chips></div>
+      </div>
+    </div>
+    <div class="legend" id="legend"></div>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <h2>Inventory <span class="hint" id="filterLabel"></span></h2>
+      <div class="filters">
+        <div class="seg" id="statusSeg">
+          <button data-status="all" class="on">All</button>
+          <button data-status="new">New</button>
+          <button data-status="inuse">In use</button>
+          <button data-status="used">Used</button>
+        </div>
+        <button class="btn outline" id="clearFilter" hidden>Show all rooms</button>
+      </div>
+    </div>
+    <div class="table-wrap" id="tableWrap">
+      <table>
+        <thead><tr>
+          <th>Gas</th><th>Status</th><th class="num">Qty</th><th>Location</th><th>Note</th><th>Updated</th><th></th>
+        </tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+    <div class="empty-state" id="emptyState" hidden>
+      <p>No cylinders recorded yet.</p>
+      <button class="btn primary" id="emptyAdd" style="background:var(--brand);color:#fff">Add the first cylinder</button>
+      <button class="btn outline" id="sampleBtn">Load sample data</button>
+    </div>
+    <div class="foot">
+      <span>Data is saved in this browser. Use <b>Export</b> to share the current state and <b>Import</b> to load it elsewhere.</span>
+      <span id="entryCount"></span>
+    </div>
+  </section>
+</main>
+
+<!-- Add / Edit dialog -->
+<dialog id="dlg">
+  <form method="dialog" id="form">
+    <div class="modal-h">
+      <h3 id="dlgTitle">Add cylinders</h3>
+      <button type="button" class="btn outline icon" id="closeDlg" aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+    <div class="modal-b">
+      <div class="field">
+        <label for="fGas">Gas</label>
+        <div class="gas-select-row">
+          <svg class="gas-preview" id="gasPreview" viewBox="0 0 22 34"></svg>
+          <select id="fGas" required></select>
+        </div>
+      </div>
+      <div class="field" id="customGasField" hidden>
+        <label for="fGasName">New gas name</label>
+        <input id="fGasName" placeholder="e.g. Kr, SF₆, 10% CO₂/N₂" maxlength="24">
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label for="fCount">Quantity</label>
+          <div class="qty">
+            <button type="button" id="qMinus" aria-label="Decrease">−</button>
+            <input id="fCount" type="number" min="1" max="99" value="1" required>
+            <button type="button" id="qPlus" aria-label="Increase">+</button>
+          </div>
+        </div>
+        <div class="field">
+          <label for="fLab">Location</label>
+          <select id="fLab" required>
+            <option value="460">460 · Sorption Lab</option>
+            <option value="458">458 · Perm1</option>
+            <option value="472">472 · Instrument</option>
+            <option value="474-475">474–475 · Perm2</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label>Status</label>
+        <div class="status-pick">
+          <input type="radio" name="status" id="sNew" value="new" checked><label for="sNew" class="new"><i></i>New</label>
+          <input type="radio" name="status" id="sInuse" value="inuse"><label for="sInuse" class="inuse"><i></i>In use</label>
+          <input type="radio" name="status" id="sUsed" value="used"><label for="sUsed" class="used"><i></i>Used</label>
+        </div>
+      </div>
+      <div class="field">
+        <label for="fNote">Note <span class="muted">(optional)</span></label>
+        <input id="fNote" placeholder="e.g. UHP grade, connected to GC-2, rack B" maxlength="80">
+      </div>
+    </div>
+    <div class="modal-f">
+      <button type="button" class="btn danger" id="deleteBtn" hidden>Delete</button>
+      <div class="right">
+        <button type="button" class="btn outline" id="cancelBtn">Cancel</button>
+        <button type="submit" class="btn primary" id="saveBtn" style="background:var(--brand);color:#fff">Add</button>
+      </div>
+    </div>
+  </form>
+</dialog>
+
+<div class="tip" id="tip" role="tooltip"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+(() => {
+'use strict';
+const STORE_KEY = 'koros-gas-cylinders-v1';
+const THEME_KEY = 'koros-gas-theme';
+
+/* ---------- gas catalogue ---------- */
+const GASES = [
+  { id:'N2',   label:'N₂',      name:'Nitrogen',        color:'#2a78d6' },
+  { id:'CO2',  label:'CO₂',     name:'Carbon dioxide',  color:'#eb6834' },
+  { id:'He',   label:'He',      name:'Helium',          color:'#1baf7a' },
+  { id:'CH4',  label:'CH₄',     name:'Methane',         color:'#eda100' },
+  { id:'O2',   label:'O₂',      name:'Oxygen',          color:'#008300' },
+  { id:'H2',   label:'H₂',      name:'Hydrogen',        color:'#e34948' },
+  { id:'Ar',   label:'Ar',      name:'Argon',           color:'#4a3aa7' },
+  { id:'Air',  label:'Air',     name:'Compressed air',  color:'#e87ba4' },
+  { id:'C3H6', label:'C₃H₆',    name:'Propylene',       color:'#0f8b8d' },
+  { id:'C3H8', label:'C₃H₈',    name:'Propane',         color:'#8a5a2b' },
+  { id:'CO2CH4', label:'CO₂/CH₄', name:'CO₂/CH₄ mix',   color:'#6b7280' },
+];
+const EXTRA_COLORS = ['#0ea5e9','#a21caf','#65a30d','#b45309','#0f766e','#7c3aed','#be123c','#334155'];
+const LABS = {
+  '460':     { num:'460',     name:'Sorption Lab' },
+  '458':     { num:'458',     name:'Perm1' },
+  '472':     { num:'472',     name:'Instrument' },
+  '474-475': { num:'474–475', name:'Perm2' },
+};
+const STATUS = { new:'New', inuse:'In use', used:'Used' };
+
+/* ---------- state ---------- */
+let state = load();
+let filterLab = null;
+let filterStatus = 'all';
+let editingId = null;
+
+function load(){
+  try{
+    const raw = localStorage.getItem(STORE_KEY);
+    if(raw){ const s = JSON.parse(raw); if(s && Array.isArray(s.entries)) return { entries:s.entries, customGases:s.customGases||[] }; }
+  }catch(e){}
+  return { entries:[], customGases:[] };
+}
+function save(){
+  try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }catch(e){ toast('Could not save to this browser'); }
+}
+function allGases(){ return GASES.concat(state.customGases); }
+function gasById(id){ return allGases().find(g => g.id===id) || { id, label:id, name:id, color:'#6b7280' }; }
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+
+/* ---------- cylinder icon ---------- */
+function cylSVG(color, cls='cyl'){
+  return `<svg class="${cls}" viewBox="0 0 22 34" aria-hidden="true">
+    <rect x="8" y="1" width="6" height="5" rx="1.5" fill="${shade(color,-35)}"/>
+    <path d="M4 10 Q4 6 11 6 Q18 6 18 10 V30 Q18 33 15 33 H7 Q4 33 4 30 Z" fill="${color}"/>
+    <rect x="6.5" y="9" width="2.2" height="20" rx="1.1" fill="rgba(255,255,255,.35)"/>
+  </svg>`;
+}
+function shade(hex, pct){
+  const n = parseInt(hex.slice(1),16); let r=n>>16, g=(n>>8)&255, b=n&255;
+  const f = v => Math.max(0,Math.min(255, Math.round(v + (pct/100)*(pct<0? v : 255-v))));
+  return '#' + [f(r),f(g),f(b)].map(x=>x.toString(16).padStart(2,'0')).join('');
+}
+
+/* ---------- aggregation ---------- */
+function totals(entries){
+  const t = { total:0, new:0, inuse:0, used:0 };
+  for(const e of entries){ t.total += e.count; t[e.status] += e.count; }
+  return t;
+}
+function byLabGas(){
+  const out = {};
+  for(const lab of Object.keys(LABS)) out[lab] = {};
+  for(const e of state.entries){
+    const lab = out[e.lab] || (out[e.lab] = {});
+    const g = lab[e.gas] || (lab[e.gas] = { new:0, inuse:0, used:0, total:0 });
+    g[e.status] += e.count; g.total += e.count;
+  }
+  return out;
+}
+
+/* ---------- render ---------- */
+function render(){
+  const t = totals(state.entries);
+  document.getElementById('stTotal').textContent = t.total;
+  document.getElementById('stInuse').textContent = t.inuse;
+  document.getElementById('stNew').textContent = t.new;
+  document.getElementById('stUsed').textContent = t.used;
+
+  const last = state.entries.reduce((m,e)=> e.updated>m ? e.updated : m, 0);
+  document.getElementById('lastUpdated').textContent = last ? 'Last updated ' + fmtDate(last) : 'No records yet';
+
+  // map
+  const agg = byLabGas();
+  const order = allGases().map(g=>g.id);
+  document.querySelectorAll('.room').forEach(room => {
+    const lab = room.dataset.lab;
+    const gases = agg[lab] || {};
+    const ids = Object.keys(gases).sort((a,b)=> order.indexOf(a)-order.indexOf(b));
+    const total = ids.reduce((s,id)=> s+gases[id].total, 0);
+    room.querySelector('[data-total]').textContent = total ? total : '';
+    room.classList.toggle('active', filterLab===lab);
+    const chips = room.querySelector('[data-chips]');
+    if(!ids.length){ chips.innerHTML = '<span class="empty">no cylinders</span>'; return; }
+    chips.innerHTML = ids.map(id => {
+      const g = gasById(id), c = gases[id];
+      const dots = ['new','inuse','used'].filter(s=>c[s]>0).map(s=>`<i class="${s}"></i>`).join('');
+      return `<span class="chip" data-lab="${lab}" data-gas="${id}">${cylSVG(g.color)}<span>${g.label}</span><span class="cnt">${c.total}</span><span class="dots">${dots}</span></span>`;
+    }).join('');
+  });
+
+  // legend
+  const used = new Set(state.entries.map(e=>e.gas));
+  const legendGases = allGases().filter(g=>used.has(g.id));
+  document.getElementById('legend').innerHTML =
+    (legendGases.length ? legendGases.map(g=>`<span class="li"><span class="sw" style="background:${g.color}"></span>${g.label} <span class="muted">${g.name}</span></span>`).join('') + '<span class="sep"></span>' : '') +
+    `<span class="li"><span class="dot" style="background:var(--status-new)"></span>New</span>
+     <span class="li"><span class="dot" style="background:var(--status-inuse)"></span>In use</span>
+     <span class="li"><span class="dot" style="background:var(--status-used)"></span>Used</span>`;
+
+  // table
+  let rows = state.entries.slice().sort((a,b)=> (a.lab.localeCompare(b.lab)) || (order.indexOf(a.gas)-order.indexOf(b.gas)) || (b.updated-a.updated));
+  if(filterLab) rows = rows.filter(e=>e.lab===filterLab);
+  if(filterStatus!=='all') rows = rows.filter(e=>e.status===filterStatus);
+
+  document.getElementById('filterLabel').textContent = filterLab ? `· ${LABS[filterLab].num} ${LABS[filterLab].name}` : '';
+  document.getElementById('clearFilter').hidden = !filterLab;
+
+  const tbody = document.getElementById('rows');
+  const empty = state.entries.length===0;
+  document.getElementById('emptyState').hidden = !empty;
+  document.getElementById('tableWrap').hidden = empty;
+  tbody.innerHTML = rows.map(e => {
+    const g = gasById(e.gas), lab = LABS[e.lab] || { num:e.lab, name:'' };
+    return `<tr data-id="${e.id}">
+      <td><span class="gas-cell">${cylSVG(g.color)}<span>${g.label}</span> <span class="muted">${g.name!==g.label? g.name:''}</span></span></td>
+      <td><span class="badge ${e.status}"><i></i>${STATUS[e.status]}</span></td>
+      <td class="num">${e.count}</td>
+      <td class="lab-cell"><b>${lab.num}</b> ${lab.name}</td>
+      <td class="muted">${escapeHtml(e.note||'')}</td>
+      <td class="muted">${fmtDate(e.updated)}</td>
+      <td style="text-align:right"><button class="rowbtn" data-edit="${e.id}">Edit</button></td>
+    </tr>`;
+  }).join('') || (!empty ? `<tr><td colspan="7" class="muted" style="text-align:center;padding:24px">No entries match this filter.</td></tr>` : '');
+  document.getElementById('entryCount').textContent = state.entries.length ? `${state.entries.length} record${state.entries.length>1?'s':''} · ${t.total} cylinders` : '';
+}
+function fmtDate(ts){
+  const d = new Date(ts);
+  return d.toLocaleDateString(undefined,{month:'short',day:'numeric'}) + ' ' + d.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'});
+}
+function escapeHtml(s){ return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+/* ---------- dialog ---------- */
+const dlg = document.getElementById('dlg');
+const fGas = document.getElementById('fGas'), fGasName = document.getElementById('fGasName');
+const fCount = document.getElementById('fCount'), fLab = document.getElementById('fLab'), fNote = document.getElementById('fNote');
+
+function fillGasSelect(selected){
+  fGas.innerHTML = allGases().map(g=>`<option value="${g.id}">${g.label} — ${g.name}</option>`).join('') + '<option value="__new">+ Other gas…</option>';
+  fGas.value = selected && allGases().some(g=>g.id===selected) ? selected : allGases()[0].id;
+  onGasChange();
+}
+function onGasChange(){
+  const isNew = fGas.value==='__new';
+  document.getElementById('customGasField').hidden = !isNew;
+  fGasName.required = isNew;
+  const color = isNew ? EXTRA_COLORS[state.customGases.length % EXTRA_COLORS.length] : gasById(fGas.value).color;
+  document.getElementById('gasPreview').outerHTML = cylSVG(color,'gas-preview').replace('<svg', '<svg id="gasPreview"');
+  if(isNew) setTimeout(()=>fGasName.focus(),0);
+}
+fGas.addEventListener('change', onGasChange);
+
+function openAdd(prefLab){
+  editingId = null;
+  document.getElementById('dlgTitle').textContent = 'Add cylinders';
+  document.getElementById('saveBtn').textContent = 'Add';
+  document.getElementById('deleteBtn').hidden = true;
+  fillGasSelect(); fGasName.value=''; fCount.value = 1; fLab.value = prefLab || '460'; fNote.value='';
+  document.getElementById('sNew').checked = true;
+  dlg.showModal();
+}
+function openEdit(id){
+  const e = state.entries.find(x=>x.id===id); if(!e) return;
+  editingId = id;
+  document.getElementById('dlgTitle').textContent = 'Edit entry';
+  document.getElementById('saveBtn').textContent = 'Save';
+  document.getElementById('deleteBtn').hidden = false;
+  fillGasSelect(e.gas); fGasName.value=''; fCount.value = e.count; fLab.value = e.lab; fNote.value = e.note||'';
+  document.querySelector(`input[name=status][value=${e.status}]`).checked = true;
+  dlg.showModal();
+}
+document.getElementById('form').addEventListener('submit', ev => {
+  ev.preventDefault();
+  let gasId = fGas.value;
+  if(gasId==='__new'){
+    const name = fGasName.value.trim(); if(!name){ fGasName.focus(); return; }
+    const existing = allGases().find(g=>g.label.toLowerCase()===name.toLowerCase() || g.id.toLowerCase()===name.toLowerCase());
+    if(existing) gasId = existing.id;
+    else{
+      gasId = 'custom-' + uid();
+      state.customGases.push({ id:gasId, label:name, name:name, color:EXTRA_COLORS[state.customGases.length % EXTRA_COLORS.length] });
+    }
+  }
+  const count = Math.max(1, Math.min(99, parseInt(fCount.value,10)||1));
+  const status = document.querySelector('input[name=status]:checked').value;
+  const entry = { gas:gasId, count, status, lab:fLab.value, note:fNote.value.trim(), updated:Date.now() };
+  if(editingId){
+    const i = state.entries.findIndex(x=>x.id===editingId);
+    state.entries[i] = { ...state.entries[i], ...entry };
+    toast('Entry updated');
+  }else{
+    // merge into an identical (gas, status, lab) row if one exists
+    const same = state.entries.find(x=>x.gas===gasId && x.status===status && x.lab===entry.lab && (x.note||'')===entry.note);
+    if(same){ same.count += count; same.updated = Date.now(); }
+    else state.entries.push({ id:uid(), ...entry });
+    toast(`Added ${count} × ${gasById(gasId).label} to ${LABS[entry.lab].num}`);
+  }
+  save(); render(); dlg.close();
+});
+document.getElementById('deleteBtn').addEventListener('click', () => {
+  if(!editingId) return;
+  const e = state.entries.find(x=>x.id===editingId);
+  state.entries = state.entries.filter(x=>x.id!==editingId);
+  save(); render(); dlg.close();
+  toast(`Removed ${e.count} × ${gasById(e.gas).label}`);
+});
+document.getElementById('cancelBtn').addEventListener('click', ()=>dlg.close());
+document.getElementById('closeDlg').addEventListener('click', ()=>dlg.close());
+dlg.addEventListener('click', e => { if(e.target===dlg) dlg.close(); });
+document.getElementById('qMinus').addEventListener('click', ()=>{ fCount.value = Math.max(1,(parseInt(fCount.value,10)||1)-1); });
+document.getElementById('qPlus').addEventListener('click', ()=>{ fCount.value = Math.min(99,(parseInt(fCount.value,10)||0)+1); });
+
+/* ---------- interactions ---------- */
+document.getElementById('addBtn').addEventListener('click', ()=>openAdd(filterLab));
+document.getElementById('emptyAdd').addEventListener('click', ()=>openAdd());
+document.getElementById('rows').addEventListener('click', e => {
+  const b = e.target.closest('[data-edit]'); if(b) openEdit(b.dataset.edit);
+});
+document.querySelectorAll('.room').forEach(room => {
+  const toggle = () => { filterLab = filterLab===room.dataset.lab ? null : room.dataset.lab; render(); };
+  room.addEventListener('click', toggle);
+  room.addEventListener('keydown', e => { if(e.key==='Enter'||e.key===' '){ e.preventDefault(); toggle(); } });
+});
+document.getElementById('clearFilter').addEventListener('click', ()=>{ filterLab=null; render(); });
+document.getElementById('statusSeg').addEventListener('click', e => {
+  const b = e.target.closest('button'); if(!b) return;
+  filterStatus = b.dataset.status;
+  document.querySelectorAll('#statusSeg button').forEach(x=>x.classList.toggle('on', x===b));
+  render();
+});
+
+// tooltip on chips
+const tip = document.getElementById('tip');
+document.getElementById('map').addEventListener('mouseover', e => {
+  const chip = e.target.closest('.chip'); if(!chip) return;
+  const agg = byLabGas()[chip.dataset.lab][chip.dataset.gas]; const g = gasById(chip.dataset.gas);
+  tip.innerHTML = `<b>${g.label}</b> · ${g.name}<div class="row"><span>New</span><b>${agg.new}</b></div><div class="row"><span>In use</span><b>${agg.inuse}</b></div><div class="row"><span>Used</span><b>${agg.used}</b></div>`;
+  tip.classList.add('show'); moveTip(e);
+});
+document.getElementById('map').addEventListener('mousemove', e => { if(tip.classList.contains('show')) moveTip(e); });
+document.getElementById('map').addEventListener('mouseout', e => { if(e.target.closest('.chip')) tip.classList.remove('show'); });
+function moveTip(e){
+  const pad = 12, w = tip.offsetWidth, h = tip.offsetHeight;
+  let x = e.clientX + pad, y = e.clientY + pad;
+  if(x + w > window.innerWidth - 8) x = e.clientX - w - pad;
+  if(y + h > window.innerHeight - 8) y = e.clientY - h - pad;
+  tip.style.left = x + 'px'; tip.style.top = y + 'px';
+}
+
+// export / import
+document.getElementById('exportBtn').addEventListener('click', () => {
+  const blob = new Blob([JSON.stringify({ ...state, exported:new Date().toISOString() }, null, 2)], { type:'application/json' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = `koros-gas-cylinders-${new Date().toISOString().slice(0,10)}.json`; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
+});
+document.getElementById('importBtn').addEventListener('click', ()=>document.getElementById('importFile').click());
+document.getElementById('importFile').addEventListener('change', async e => {
+  const f = e.target.files[0]; if(!f) return;
+  try{
+    const s = JSON.parse(await f.text());
+    if(!s || !Array.isArray(s.entries)) throw new Error('bad');
+    state = { entries:s.entries.filter(x=>x && x.gas && x.lab && x.status && x.count>0), customGases:Array.isArray(s.customGases)?s.customGases:[] };
+    save(); render(); toast('Inventory imported');
+  }catch(err){ toast('That file is not a valid inventory export'); }
+  e.target.value = '';
+});
+document.getElementById('sampleBtn').addEventListener('click', () => {
+  const now = Date.now();
+  state.entries = [
+    { id:uid(), gas:'N2',  count:3, status:'inuse', lab:'460', note:'UHP · sorption rigs', updated:now },
+    { id:uid(), gas:'He',  count:2, status:'new',   lab:'460', note:'', updated:now },
+    { id:uid(), gas:'CO2', count:2, status:'used',  lab:'460', note:'', updated:now },
+    { id:uid(), gas:'CO2', count:2, status:'inuse', lab:'458', note:'Perm rig 1', updated:now },
+    { id:uid(), gas:'CH4', count:1, status:'new',   lab:'458', note:'', updated:now },
+    { id:uid(), gas:'N2',  count:1, status:'used',  lab:'458', note:'', updated:now },
+    { id:uid(), gas:'He',  count:1, status:'inuse', lab:'472', note:'GC carrier', updated:now },
+    { id:uid(), gas:'Air', count:1, status:'inuse', lab:'472', note:'', updated:now },
+    { id:uid(), gas:'CO2CH4', count:2, status:'new', lab:'474-475', note:'50/50 mix', updated:now },
+    { id:uid(), gas:'O2',  count:1, status:'used',  lab:'474-475', note:'', updated:now },
+    { id:uid(), gas:'H2',  count:1, status:'new',   lab:'474-475', note:'', updated:now },
+  ];
+  save(); render(); toast('Sample data loaded — edit or delete freely');
+});
+
+// theme
+const root = document.documentElement;
+try{ const th = localStorage.getItem(THEME_KEY); if(th) root.dataset.theme = th; }catch(e){}
+document.getElementById('themeBtn').addEventListener('click', () => {
+  const dark = root.dataset.theme ? root.dataset.theme==='dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+  root.dataset.theme = dark ? 'light' : 'dark';
+  try{ localStorage.setItem(THEME_KEY, root.dataset.theme); }catch(e){}
+});
+
+// toast
+let toastT;
+function toast(msg){
+  const el = document.getElementById('toast'); el.textContent = msg; el.classList.add('show');
+  clearTimeout(toastT); toastT = setTimeout(()=>el.classList.remove('show'), 2200);
+}
+
+// keyboard: "a" opens add
+document.addEventListener('keydown', e => {
+  if(e.key==='a' && !dlg.open && !/input|select|textarea/i.test(document.activeElement.tagName)) openAdd(filterLab);
+});
+
+render();
+})();
+</script>
+</body>
+</html>
