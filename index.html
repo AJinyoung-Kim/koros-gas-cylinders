@@ -165,7 +165,7 @@ section.card{
   grid-template-columns:minmax(150px,1fr) 40px minmax(160px,1.1fr) minmax(0,.5fr) minmax(210px,1.5fr) minmax(230px,1.8fr);
   grid-template-rows:auto 40px auto;
   grid-template-areas:
-    "sum  sum   sum  .    r472 r474"
+    "sum  sum   sum  r472 r472 r474"
     "r460 vhall hall hall hall hall"
     "r460 vhall r458 req  req  req";
   background:var(--surface-2);border:1px solid var(--border);border-radius:14px;padding:14px;
@@ -1230,9 +1230,11 @@ document.getElementById('sampleBtn').addEventListener('click', () => requirePin(
 
 // theme
 const root = document.documentElement;
-try{ const th = localStorage.getItem(THEME_KEY); if(th) root.dataset.theme = th; }catch(e){}
+// Light mode by default; the toggle stores the choice and overrides the OS setting.
+let savedTheme = null; try{ savedTheme = localStorage.getItem(THEME_KEY); }catch(e){}
+root.dataset.theme = savedTheme === 'dark' ? 'dark' : 'light';
 document.getElementById('themeBtn').addEventListener('click', () => {
-  const dark = root.dataset.theme ? root.dataset.theme==='dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+  const dark = root.dataset.theme === 'dark';
   root.dataset.theme = dark ? 'light' : 'dark';
   try{ localStorage.setItem(THEME_KEY, root.dataset.theme); }catch(e){}
 });
